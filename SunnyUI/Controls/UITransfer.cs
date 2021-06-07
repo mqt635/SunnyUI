@@ -40,6 +40,7 @@ namespace Sunny.UI
         {
             InitializeComponent();
             ShowText = false;
+            SetStyleFlags(true, false);
 
             l1.ItemsCountChange += L1_ItemsCountChange;
             l2.ItemsCountChange += L2_ItemsCountChange;
@@ -76,6 +77,13 @@ namespace Sunny.UI
         [MergableProperty(false)]
         [Description("右侧列表"), Category("SunnyUI")]
         public ListBox.ObjectCollection ItemsRight => l2.Items;
+
+        [Browsable(false)]
+        public ListBox ListBoxLeft => l1.ListBox;
+
+        [Browsable(false)]
+        public ListBox ListBoxRight => l2.ListBox;
+
 
         private void b1_Click(object sender, EventArgs e)
         {

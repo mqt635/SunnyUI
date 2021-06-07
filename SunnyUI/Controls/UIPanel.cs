@@ -44,20 +44,24 @@ namespace Sunny.UI
         public UIPanel()
         {
             InitializeComponent();
-
-            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            SetStyle(ControlStyles.DoubleBuffer, true);
-            SetStyle(ControlStyles.Selectable, true);
-            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-            SetStyle(ControlStyles.UserPaint, true);
-            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            base.DoubleBuffered = true;
-            UpdateStyles();
-
             Version = UIGlobal.Version;
             AutoScaleMode = AutoScaleMode.None;
             base.Font = UIFontColor.Font;
             base.MinimumSize = new System.Drawing.Size(1, 1);
+            SetStyleFlags(true, false);
+        }
+
+        protected void SetStyleFlags(bool supportTransparent = true, bool selectable = true, bool resizeRedraw = false)
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            if (supportTransparent) SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            if (selectable) SetStyle(ControlStyles.Selectable, true);
+            if (resizeRedraw) SetStyle(ControlStyles.ResizeRedraw, true);
+            base.DoubleBuffered = true;
+            UpdateStyles();
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -295,16 +299,33 @@ namespace Sunny.UI
             }
         }
 
+        private bool showFill = true;
+
+        /// <summary>
+        /// 是否显示填充
+        /// </summary>
+        protected bool ShowFill
+        {
+            get => showFill;
+            set
+            {
+                if (showFill != value)
+                {
+                    showFill = value;
+                    Invalidate();
+                }
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e);
             if (!Visible || Width <= 0 || Height <= 0) return;
 
             Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
             GraphicsPath path = GDIEx.CreateRoundedRectanglePath(rect, radius, RadiusSides);
 
             //填充背景色
-            if (fillColor.IsValid())
+            if (ShowFill && fillColor.IsValid())
             {
                 OnPaintFill(e.Graphics, path);
             }
@@ -321,12 +342,9 @@ namespace Sunny.UI
                 OnPaintFore(e.Graphics, path);
             }
 
-            PaintOther?.Invoke(this, e);
-
             path.Dispose();
+            base.OnPaint(e);
         }
-
-        public event PaintEventHandler PaintOther;
 
         protected virtual void OnPaintFore(Graphics g, GraphicsPath path)
         {
@@ -450,14 +468,6 @@ namespace Sunny.UI
             else
                 g.FillPath(color, path);
         }
-
-        // protected override void WndProc(ref Message m)
-        // {
-        //     if (m.Msg != 20)
-        //     {
-        //         base.WndProc(ref m);
-        //     }
-        // }
 
         protected virtual void AfterSetFillColor(Color color)
         {
@@ -596,18 +606,14 @@ namespace Sunny.UI
         /// 文字对齐方向
         /// </summary>
         [Description("文字对齐方向"), Category("SunnyUI")]
-        [DefaultValue(ContentAlignment.MiddleCenter)]
         public ContentAlignment TextAlignment
         {
             get => _textAlignment;
             set
             {
-                if (_textAlignment != value)
-                {
-                    _textAlignment = value;
-                    TextAlignmentChange?.Invoke(this, value);
-                    Invalidate();
-                }
+                _textAlignment = value;
+                TextAlignmentChange?.Invoke(this, value);
+                Invalidate();
             }
         }
 

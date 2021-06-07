@@ -37,6 +37,7 @@ namespace Sunny.UI
         public UIIntegerUpDown()
         {
             InitializeComponent();
+            SetStyleFlags();
             ShowText = false;
             edit.Type = UITextBox.UIEditType.Integer;
             edit.Parent = pnlValue;
@@ -44,12 +45,10 @@ namespace Sunny.UI
             edit.BorderStyle = BorderStyle.None;
             edit.TextChanged += Edit_TextChanged;
             edit.Leave += Edit_Leave;
-            //edit.MouseLeave += Edit_Leave;
-
-            pnlValue.PaintOther += PnlValue_PaintOther;
+            pnlValue.Paint += PnlValue_Paint;
         }
 
-        private void PnlValue_PaintOther(object sender, PaintEventArgs e)
+        private void PnlValue_Paint(object sender, PaintEventArgs e)
         {
             if (Enabled)
             {
@@ -189,10 +188,26 @@ namespace Sunny.UI
             return value;
         }
 
+        [DefaultValue(false)]
+        [Description("是否判断最大值显示"), Category("SunnyUI")]
+        public bool MaximumEnabled
+        {
+            get => HasMaximum;
+            set => HasMaximum = value;
+        }
+
+        [DefaultValue(false)]
+        [Description("是否判断最小值显示"), Category("SunnyUI")]
+        public bool MinimumEnabled
+        {
+            get => HasMinimum;
+            set => HasMinimum = value;
+        }
+
         private bool hasMaximum;
         private bool hasMinimum;
 
-        [DefaultValue(false)]
+        [DefaultValue(false), Browsable(false)]
         [Description("检查最大值"), Category("SunnyUI")]
         public bool HasMaximum
         {
@@ -209,7 +224,7 @@ namespace Sunny.UI
             }
         }
 
-        [DefaultValue(false)]
+        [DefaultValue(false), Browsable(false)]
         [Description("检查最小值"), Category("SunnyUI")]
         public bool HasMinimum
         {
@@ -237,8 +252,10 @@ namespace Sunny.UI
             pnlValue.FillColor = Color.White;
             edit.TextAlign = HorizontalAlignment.Center;
             edit.Text = pnlValue.Text;
-            edit.Visible = true;
             edit.BringToFront();
+            edit.Visible = true;
+            edit.Focus();
+            edit.SelectAll();
         }
     }
 }

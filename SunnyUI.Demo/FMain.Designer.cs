@@ -52,9 +52,11 @@
             this.Aside.Location = new System.Drawing.Point(2, 145);
             this.Aside.MenuStyle = Sunny.UI.UIMenuStyle.Black;
             this.Aside.ShowOneNode = true;
+            this.Aside.ShowSecondBackColor = true;
             this.Aside.ShowTips = true;
             this.Aside.Size = new System.Drawing.Size(250, 573);
             this.Aside.Style = Sunny.UI.UIStyle.Custom;
+            this.Aside.StyleCustomMode = true;
             // 
             // Header
             // 
@@ -128,8 +130,7 @@
             // 
             // FMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 21F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(1024, 720);
             this.ExtendBox = true;
             this.ExtendMenu = this.uiContextMenuStrip1;

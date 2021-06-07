@@ -32,11 +32,12 @@ namespace Sunny.UI
         private UIVerScrollBarEx VBar;
         private UIHorScrollBarEx HBar;
         private FlowLayoutPanel flowLayoutPanel;
+        private readonly Timer timer = new Timer();
 
         public UIFlowLayoutPanel()
         {
             InitializeComponent();
-
+            SetStyleFlags(true, false);
             ShowText = false;
 
             Panel.AutoScroll = true;
@@ -46,12 +47,40 @@ namespace Sunny.UI
             Panel.MouseWheel += Panel_MouseWheel;
             Panel.MouseEnter += Panel_MouseEnter;
             Panel.MouseClick += Panel_MouseClick;
+            Panel.ClientSizeChanged += Panel_ClientSizeChanged;
 
             VBar.ValueChanged += VBar_ValueChanged;
             HBar.ValueChanged += HBar_ValueChanged;
 
             SizeChanged += Panel_SizeChanged;
+            timer.Interval = 100;
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
+
+        ~UIFlowLayoutPanel()
+        {
+            timer.Stop();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            if (VBar.Maximum != Panel.VerticalScroll.Maximum ||
+                VBar.Visible != Panel.VerticalScroll.Visible ||
+                HBar.Maximum != Panel.HorizontalScroll.Maximum ||
+                HBar.Visible != Panel.HorizontalScroll.Visible)
+            {
+                SetScrollInfo();
+            }
+        }
+
+        private void Panel_ClientSizeChanged(object sender, EventArgs e)
+        {
+            SetScrollInfo();
+        }
+
+        [Browsable(false)]
+        public FlowLayoutPanel FlowLayoutPanel => flowLayoutPanel;
 
         protected override void OnPaintFore(Graphics g, GraphicsPath path)
         {
@@ -146,7 +175,8 @@ namespace Sunny.UI
 
         private void VBar_ValueChanged(object sender, EventArgs e)
         {
-            Panel.VerticalScroll.Value = VBar.Value;
+            if (VBar.Value.InRange(0, Panel.VerticalScroll.Maximum))
+                Panel.VerticalScroll.Value = VBar.Value;
         }
 
         private void HBar_ValueChanged(object sender, EventArgs e)
@@ -174,7 +204,7 @@ namespace Sunny.UI
             SetScrollInfo();
         }
 
-        private void SetScrollInfo()
+        public void SetScrollInfo()
         {
             VBar.Visible = Panel.VerticalScroll.Visible;
             VBar.Maximum = Panel.VerticalScroll.Maximum;

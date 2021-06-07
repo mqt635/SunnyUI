@@ -27,11 +27,13 @@ using System.Windows.Forms;
 
 namespace Sunny.UI
 {
+    [DefaultProperty("Text")]
     public partial class UIGroupBox : UIPanel
     {
         public UIGroupBox()
         {
             InitializeComponent();
+            SetStyleFlags(true, false);
         }
 
         protected override void OnPaintFill(Graphics g, GraphicsPath path)

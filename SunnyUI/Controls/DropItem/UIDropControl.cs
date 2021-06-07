@@ -47,6 +47,8 @@ namespace Sunny.UI
         public UIDropControl()
         {
             InitializeComponent();
+            SetStyleFlags();
+            Padding = new Padding(0, 0, 30, 2);
 
             edit.Font = UIFontColor.Font;
             edit.Left = 3;
@@ -65,11 +67,22 @@ namespace Sunny.UI
             TextAlignment = ContentAlignment.MiddleLeft;
             fillColor = Color.White;
             edit.BackColor = Color.White;
-            PaintOther += UIDropControl_PaintOther;
+            MouseMove += UIDropControl_MouseMove;
         }
 
-        private void UIDropControl_PaintOther(object sender, PaintEventArgs e)
+        [Browsable(false)]
+        public TextBox TextBox => edit;
+
+        protected Point MouseLocation;
+
+        private void UIDropControl_MouseMove(object sender, MouseEventArgs e)
         {
+            MouseLocation = e.Location;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
             if (Enabled)
             {
                 if (Radius == 0 || RadiusSides == UICornerRadiusSides.None)
@@ -254,6 +267,16 @@ namespace Sunny.UI
             Invalidate();
         }
 
+        protected override void OnPaddingChanged(EventArgs e)
+        {
+            if (Padding.Right < 30 || Padding.Bottom < 2)
+            {
+                Padding = new Padding(Padding.Left, Padding.Top, Padding.Right < 30 ? 30 : Padding.Right, Padding.Bottom < 2 ? 2 : Padding.Bottom);
+            }
+            base.OnPaddingChanged(e);
+            SizeChange();
+        }
+
         protected override void OnSizeChanged(EventArgs e)
         {
             SizeChange();
@@ -261,15 +284,9 @@ namespace Sunny.UI
 
         private void SizeChange()
         {
-            TextBox edt = new TextBox();
-            edt.Font = edit.Font;
-            edt.Invalidate();
-            Height = edt.Height;
-            edt.Dispose();
-
             edit.Top = (Height - edit.Height) / 2;
-            edit.Left = 3;
-            edit.Width = Width - 30;
+            edit.Left = 3 + Padding.Left;
+            edit.Width = Width - Padding.Left - Padding.Right;
         }
 
         protected override void OnPaintFore(Graphics g, GraphicsPath path)
@@ -282,16 +299,11 @@ namespace Sunny.UI
                 g.FillRoundRectangle(GetFillColor(), new Rectangle(Width - 27, edit.Top, 26, edit.Height), Radius, false);
                 g.DrawRoundRectangle(rectColor, new Rectangle(0, 0, Width, Height), Radius, true);
             }
-        }
 
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            Padding = new Padding(0, 0, 30, 2);
-            e.Graphics.FillRoundRectangle(GetFillColor(), new Rectangle(Width - 27, edit.Top, 25, edit.Height), Radius);
+            g.FillRoundRectangle(GetFillColor(), new Rectangle(Width - 27, edit.Top, 25, edit.Height), Radius);
             Color color = GetRectColor();
-            SizeF sf = e.Graphics.GetFontImageSize(dropSymbol, 24);
-            e.Graphics.DrawFontImage(dropSymbol, 24, color, Width - 28 + (12 - sf.Width / 2.0f), (Height - sf.Height) / 2.0f);
+            SizeF sf = g.GetFontImageSize(dropSymbol, 24);
+            g.DrawFontImage(dropSymbol, 24, color, Width - 28 + (12 - sf.Width / 2.0f), (Height - sf.Height) / 2.0f);
         }
 
         protected override void OnGotFocus(EventArgs e)
@@ -314,6 +326,7 @@ namespace Sunny.UI
         }
 
         [DefaultValue(false)]
+        [Description("是否只读"), Category("SunnyUI")]
         public bool ReadOnly
         {
             get => edit.ReadOnly;
@@ -383,6 +396,8 @@ namespace Sunny.UI
             edit.ForeColor = foreColor;
         }
 
+        protected bool fullControlSelect;
+
         protected override void OnClick(EventArgs e)
         {
             if (!ReadOnly)
@@ -396,7 +411,16 @@ namespace Sunny.UI
                 }
 
                 DropDown?.Invoke(this, e);
-                ButtonClick?.Invoke(this, e);
+
+
+                if (fullControlSelect || MouseLocation.X > Width - 30)
+                {
+                    ButtonClick?.Invoke(this, e);
+                }
+                else
+                {
+                    base.OnClick(e);
+                }
             }
         }
 

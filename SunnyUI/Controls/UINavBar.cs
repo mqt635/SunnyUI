@@ -18,6 +18,7 @@
  *
  * 2020-01-01: V2.2.0 增加文件说明
  * 2020-08-28: V2.2.7 增加节点的Image绘制
+ * 2021-03-20: V3.0.2 增加可设置背景图片
 ******************************************************************************/
 
 using System;
@@ -44,7 +45,7 @@ namespace Sunny.UI
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            SetStyle(ControlStyles.ResizeRedraw, true);
+            //SetStyle(ControlStyles.ResizeRedraw, true);
             DoubleBuffered = true;
             UpdateStyles();
             Font = UIFontColor.Font;
@@ -54,6 +55,12 @@ namespace Sunny.UI
             Width = 500;
             Height = 110;
             Version = UIGlobal.Version;
+        }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+            Invalidate();
         }
 
         public void ClearAll()
@@ -330,7 +337,11 @@ namespace Sunny.UI
         {
             base.OnPaint(e);
 
-            e.Graphics.Clear(BackColor);
+            if (BackgroundImage == null)
+            {
+                e.Graphics.Clear(BackColor);
+            }
+
             NodeX = 0;
             NodeY = Height - NodeSize.Height;
 

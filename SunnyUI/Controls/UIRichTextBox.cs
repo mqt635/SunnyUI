@@ -17,7 +17,7 @@ namespace Sunny.UI
         public UIRichTextBox()
         {
             InitializeComponent();
-
+            SetStyleFlags();
             ShowText = false;
 
             edit.MouseWheel += OnMouseWheel;
@@ -45,6 +45,8 @@ namespace Sunny.UI
 
             edit.ScrollBars = RichTextBoxScrollBars.Vertical;
         }
+
+        public override Color BackColor { get => edit.BackColor; set { edit.BackColor = base.BackColor = value; } }
 
         protected override void OnContextMenuStripChanged(EventArgs e)
         {

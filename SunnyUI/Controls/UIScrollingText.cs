@@ -38,6 +38,7 @@ namespace Sunny.UI
 
         public UIScrollingText()
         {
+            SetStyleFlags(true, false);
             fillColor = UIStyles.Blue.PlainColor;
             foreColor = UIStyles.Blue.RectColor;
             Reset();
@@ -46,6 +47,9 @@ namespace Sunny.UI
             timer.Tick += Timer_Tick;
             timer.Start();
         }
+
+        [DefaultValue(false), Description("点击暂停滚动"), Category("SunnyUI")]
+        public bool ClickPause { get; set; }
 
         private void Reset()
         {
@@ -113,10 +117,14 @@ namespace Sunny.UI
             }
         }
 
-        protected override void OnClick(EventArgs e)
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
-            timer.Enabled = !timer.Enabled;
-            base.OnClick(e);
+            if (ClickPause)
+            {
+                timer.Enabled = !timer.Enabled;
+            }
+
+            base.OnMouseDoubleClick(e);
         }
 
         protected override void OnPaintFore(Graphics g, GraphicsPath path)

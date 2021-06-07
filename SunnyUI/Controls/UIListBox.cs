@@ -41,6 +41,7 @@ namespace Sunny.UI
         public UIListBox()
         {
             InitializeComponent();
+            SetStyleFlags(true, false);
             ShowText = false;
             Padding = new Padding(2);
 
@@ -64,10 +65,16 @@ namespace Sunny.UI
             listbox.MouseDown += Listbox_MouseDown;
             listbox.MouseUp += Listbox_MouseUp;
             listbox.MouseMove += Listbox_MouseMove;
+            ListBox.DataSourceChanged += Box_DataSourceChanged;
+            ListBox.DisplayMemberChanged += Box_DisplayMemberChanged;
+            ListBox.ValueMemberChanged += Box_ValueMemberChanged;
 
             timer.Tick += Timer_Tick;
             timer.Start();
         }
+
+        [Browsable(false)]
+        public ListBox ListBox => listbox;
 
         [DefaultValue(StringAlignment.Near)]
         [Description("列表项高度"), Category("SunnyUI")]
@@ -624,11 +631,34 @@ namespace Sunny.UI
             Color foreColor = isSelected ? ItemSelectForeColor : ForeColor;
 
             Rectangle rect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1);
+            string showText = string.Empty;
+            if (DisplayMember.IsNullOrEmpty())
+            {
+                showText = Items[e.Index].ToString();
+            }
+            else
+            {
+                var list = Items[e.Index].GetType().GetNeedProperties();
+                foreach (var info in list)
+                {
+                    if (info.Name == DisplayMember)
+                    {
+                        object defaultobj = info.GetValue(Items[e.Index], null);
+                        showText = defaultobj.ToString();
+                    }
+                }
+
+                if (showText.IsNullOrEmpty())
+                {
+                    showText = Items[e.Index].ToString();
+                }
+            }
+
             if (!otherState)
             {
                 e.Graphics.FillRectangle(BackColor, e.Bounds);
                 e.Graphics.FillRoundRectangle(backColor, rect, 5);
-                e.Graphics.DrawString(Items[e.Index].ToString(), e.Font, foreColor, e.Bounds, sStringFormat);
+                e.Graphics.DrawString(showText, e.Font, foreColor, e.Bounds, sStringFormat);
             }
             else
             {
@@ -646,7 +676,7 @@ namespace Sunny.UI
 
                 e.Graphics.FillRectangle(BackColor, e.Bounds);
                 e.Graphics.FillRoundRectangle(backColor, rect, 5);
-                e.Graphics.DrawString(Items[e.Index].ToString(), e.Font, foreColor, e.Bounds, sStringFormat);
+                e.Graphics.DrawString(showText, e.Font, foreColor, e.Bounds, sStringFormat);
             }
 
             AfterDrawItem?.Invoke(this, Items, e);

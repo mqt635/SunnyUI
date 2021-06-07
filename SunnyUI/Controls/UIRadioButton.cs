@@ -30,8 +30,8 @@ using System.Windows.Forms;
 
 namespace Sunny.UI
 {
-    [DefaultEvent("ValueChanged")]
-    [DefaultProperty("Text")]
+    [DefaultEvent("CheckedChanged")]
+    [DefaultProperty("Checked")]
     [ToolboxItem(true)]
     public sealed class UIRadioButton : UIControl
     {
@@ -39,18 +39,21 @@ namespace Sunny.UI
 
         public event OnValueChanged ValueChanged;
 
+        public event EventHandler CheckedChanged;
+
         public UIRadioButton()
         {
+            SetStyleFlags();
             Cursor = Cursors.Hand;
             ShowRect = false;
             Size = new Size(150, 29);
             foreColor = UIStyles.Blue.CheckBoxForeColor;
             fillColor = UIStyles.Blue.CheckBoxColor;
-            PaintOther += UIRadioButton_PaintOther;
         }
 
-        private void UIRadioButton_PaintOther(object sender, PaintEventArgs e)
+        protected override void OnPaint(PaintEventArgs e)
         {
+            base.OnPaint(e);
             if (AutoSize)
             {
                 SizeF sf = Text.MeasureString(Font);
@@ -71,7 +74,7 @@ namespace Sunny.UI
             set
             {
                 autoSize = value;
-                UIRadioButton_PaintOther(this, null);
+                Invalidate();
             }
         }
 
@@ -149,6 +152,7 @@ namespace Sunny.UI
                 }
 
                 ValueChanged?.Invoke(this, _checked);
+                CheckedChanged?.Invoke(this, new EventArgs());
                 Invalidate();
             }
         }
@@ -225,6 +229,7 @@ namespace Sunny.UI
         }
 
         [DefaultValue(0)]
+        [Description("分组编号"), Category("SunnyUI")]
         public int GroupIndex { get; set; }
 
         /// <summary>

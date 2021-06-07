@@ -20,6 +20,7 @@
 ******************************************************************************/
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -33,7 +34,9 @@ namespace Sunny.UI
         Double,
         Date,
         DateTime,
-        Password
+        Password,
+        Combobox,
+        Switch
     }
 
     public class EditInfo
@@ -51,6 +54,10 @@ namespace Sunny.UI
         public bool Enabled { get; set; }
 
         public bool HalfWidth { get; set; }
+
+        public object DataSource { get; set; }
+        public string DisplayMember { get; set; }
+        public string ValueMember { get; set; }
     }
 
     public class UIEditOption
@@ -175,6 +182,67 @@ namespace Sunny.UI
                 Value = value,
                 Enabled = enabled,
                 HalfWidth = halfWidth
+            };
+
+            Infos.Add(info);
+            Dictionary.TryAdd(info.DataPropertyName, info);
+        }
+
+        public void AddSwitch(string dataPropertyName, string text, bool value, bool enabled = true)
+        {
+            if (Dictionary.ContainsKey(dataPropertyName))
+                throw new DuplicateNameException(dataPropertyName + ": 已经存在");
+
+            EditInfo info = new EditInfo()
+            {
+                DataPropertyName = dataPropertyName,
+                EditType = EditType.Switch,
+                Text = text,
+                Value = value,
+                Enabled = enabled
+            };
+
+            Infos.Add(info);
+            Dictionary.TryAdd(info.DataPropertyName, info);
+        }
+
+        public void AddCombobox(string dataPropertyName, string text, IList dataSource, string displayMember,
+            string valueMember, object value, bool enabled = true, bool halfWidth = false)
+        {
+            if (Dictionary.ContainsKey(dataPropertyName))
+                throw new DuplicateNameException(dataPropertyName + ": 已经存在");
+
+            EditInfo info = new EditInfo()
+            {
+                DataPropertyName = dataPropertyName,
+                EditType = EditType.Combobox,
+                Text = text,
+                Value = value,
+                Enabled = enabled,
+                HalfWidth = halfWidth,
+                DataSource = dataSource,
+                DisplayMember = displayMember,
+                ValueMember = valueMember
+            };
+
+            Infos.Add(info);
+            Dictionary.TryAdd(info.DataPropertyName, info);
+        }
+
+        public void AddCombobox(string dataPropertyName, string text, string[] items, int selectedIndex = -1, bool enabled = true, bool halfWidth = false)
+        {
+            if (Dictionary.ContainsKey(dataPropertyName))
+                throw new DuplicateNameException(dataPropertyName + ": 已经存在");
+
+            EditInfo info = new EditInfo()
+            {
+                DataPropertyName = dataPropertyName,
+                EditType = EditType.Combobox,
+                Text = text,
+                Value = selectedIndex,
+                Enabled = enabled,
+                HalfWidth = halfWidth,
+                DataSource = items
             };
 
             Infos.Add(info);

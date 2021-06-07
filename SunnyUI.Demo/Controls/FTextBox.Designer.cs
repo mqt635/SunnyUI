@@ -45,12 +45,16 @@
             this.uiLine2 = new Sunny.UI.UILine();
             this.uiLine3 = new Sunny.UI.UILine();
             this.uiTextBox4 = new Sunny.UI.UITextBox();
+            this.uiTextBox6 = new Sunny.UI.UITextBox();
+            this.uiTextBox5 = new Sunny.UI.UITextBox();
             this.PagePanel.SuspendLayout();
             this.uiContextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // PagePanel
             // 
+            this.PagePanel.Controls.Add(this.uiTextBox6);
+            this.PagePanel.Controls.Add(this.uiTextBox5);
             this.PagePanel.Controls.Add(this.uiTextBox4);
             this.PagePanel.Controls.Add(this.uiLine3);
             this.PagePanel.Controls.Add(this.uiLine2);
@@ -80,6 +84,7 @@
             this.uiIntegerUpDown1.Size = new System.Drawing.Size(150, 29);
             this.uiIntegerUpDown1.TabIndex = 2;
             this.uiIntegerUpDown1.Text = "_uiIntegerUpDown1";
+            this.uiIntegerUpDown1.TextAlignment = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // uiTextBox1
             // 
@@ -95,6 +100,7 @@
             this.uiTextBox1.Padding = new System.Windows.Forms.Padding(5);
             this.uiTextBox1.Size = new System.Drawing.Size(221, 29);
             this.uiTextBox1.TabIndex = 3;
+            this.uiTextBox1.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
             this.uiTextBox1.Watermark = "水印文字";
             // 
             // uiLabel1
@@ -112,7 +118,7 @@
             // 
             this.uiLabel2.AutoSize = true;
             this.uiLabel2.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.uiLabel2.Location = new System.Drawing.Point(38, 97);
+            this.uiLabel2.Location = new System.Drawing.Point(38, 175);
             this.uiLabel2.Name = "uiLabel2";
             this.uiLabel2.Size = new System.Drawing.Size(65, 21);
             this.uiLabel2.TabIndex = 6;
@@ -127,7 +133,7 @@
             this.uiTextBox2.FillColor = System.Drawing.Color.White;
             this.uiTextBox2.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.uiTextBox2.IntValue = 5;
-            this.uiTextBox2.Location = new System.Drawing.Point(117, 93);
+            this.uiTextBox2.Location = new System.Drawing.Point(117, 171);
             this.uiTextBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.uiTextBox2.Maximum = 9D;
             this.uiTextBox2.Minimum = 0D;
@@ -137,6 +143,7 @@
             this.uiTextBox2.Size = new System.Drawing.Size(221, 29);
             this.uiTextBox2.TabIndex = 5;
             this.uiTextBox2.Text = "5";
+            this.uiTextBox2.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
             this.uiTextBox2.Type = Sunny.UI.UITextBox.UIEditType.Integer;
             this.uiTextBox2.Watermark = "水印文字";
             // 
@@ -144,7 +151,7 @@
             // 
             this.uiLabel3.AutoSize = true;
             this.uiLabel3.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.uiLabel3.Location = new System.Drawing.Point(38, 136);
+            this.uiLabel3.Location = new System.Drawing.Point(38, 214);
             this.uiLabel3.Name = "uiLabel3";
             this.uiLabel3.Size = new System.Drawing.Size(65, 21);
             this.uiLabel3.TabIndex = 8;
@@ -157,7 +164,7 @@
             this.uiTextBox3.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.uiTextBox3.FillColor = System.Drawing.Color.White;
             this.uiTextBox3.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.uiTextBox3.Location = new System.Drawing.Point(117, 132);
+            this.uiTextBox3.Location = new System.Drawing.Point(117, 210);
             this.uiTextBox3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.uiTextBox3.Maximum = 2147483647D;
             this.uiTextBox3.Minimum = -2147483648D;
@@ -166,6 +173,7 @@
             this.uiTextBox3.Padding = new System.Windows.Forms.Padding(5);
             this.uiTextBox3.Size = new System.Drawing.Size(221, 29);
             this.uiTextBox3.TabIndex = 7;
+            this.uiTextBox3.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
             this.uiTextBox3.Type = Sunny.UI.UITextBox.UIEditType.Double;
             this.uiTextBox3.Watermark = "水印文字";
             // 
@@ -179,6 +187,7 @@
             this.uiDoubleUpDown1.Size = new System.Drawing.Size(150, 29);
             this.uiDoubleUpDown1.TabIndex = 14;
             this.uiDoubleUpDown1.Text = "uiDoubleUpDown1";
+            this.uiDoubleUpDown1.TextAlignment = System.Drawing.ContentAlignment.MiddleCenter;
             this.uiDoubleUpDown1.Value = 0D;
             // 
             // uiLine1
@@ -220,7 +229,7 @@
             this.uiRichTextBox1.ContextMenuStrip = this.uiContextMenuStrip1;
             this.uiRichTextBox1.FillColor = System.Drawing.Color.White;
             this.uiRichTextBox1.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.uiRichTextBox1.Location = new System.Drawing.Point(388, 219);
+            this.uiRichTextBox1.Location = new System.Drawing.Point(388, 290);
             this.uiRichTextBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.uiRichTextBox1.MinimumSize = new System.Drawing.Size(1, 1);
             this.uiRichTextBox1.Name = "uiRichTextBox1";
@@ -230,6 +239,7 @@
             this.uiRichTextBox1.Text = "Blog: https://www.cnblogs.com/yhuse\nGitee: https://gitee.com/yhuse/SunnyUI\nGitHub" +
     ": https://github.com/yhuse/SunnyUI\nSunnyUI.Net 系列文章目录\n欢迎交流，QQ群： 56829229 (SunnyU" +
     "I技术交流群)，请给源码项目点个Star吧！！！";
+            this.uiRichTextBox1.TextAlignment = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // uiContextMenuStrip1
             // 
@@ -248,7 +258,7 @@
             // uiLine2
             // 
             this.uiLine2.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.uiLine2.Location = new System.Drawing.Point(30, 180);
+            this.uiLine2.Location = new System.Drawing.Point(30, 251);
             this.uiLine2.MinimumSize = new System.Drawing.Size(16, 16);
             this.uiLine2.Name = "uiLine2";
             this.uiLine2.Size = new System.Drawing.Size(308, 20);
@@ -259,7 +269,7 @@
             // uiLine3
             // 
             this.uiLine3.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.uiLine3.Location = new System.Drawing.Point(388, 180);
+            this.uiLine3.Location = new System.Drawing.Point(388, 251);
             this.uiLine3.MinimumSize = new System.Drawing.Size(16, 16);
             this.uiLine3.Name = "uiLine3";
             this.uiLine3.Size = new System.Drawing.Size(308, 20);
@@ -272,7 +282,7 @@
             this.uiTextBox4.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.uiTextBox4.FillColor = System.Drawing.Color.White;
             this.uiTextBox4.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.uiTextBox4.Location = new System.Drawing.Point(30, 219);
+            this.uiTextBox4.Location = new System.Drawing.Point(30, 290);
             this.uiTextBox4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.uiTextBox4.Maximum = 2147483647D;
             this.uiTextBox4.Minimum = -2147483648D;
@@ -285,12 +295,48 @@
             this.uiTextBox4.Text = "Blog: https://www.cnblogs.com/yhuse\r\nGitee: https://gitee.com/yhuse/SunnyUI\r\nGitH" +
     "ub: https://github.com/yhuse/SunnyUI\r\nSunnyUI.Net 系列文章目录\r\n欢迎交流，QQ群： 56829229 (Su" +
     "nnyUI技术交流群)，请给源码项目点个Star吧！！！";
+            this.uiTextBox4.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
             this.uiTextBox4.Watermark = "水印文字";
+            // 
+            // uiTextBox6
+            // 
+            this.uiTextBox6.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.uiTextBox6.FillColor = System.Drawing.Color.White;
+            this.uiTextBox6.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.uiTextBox6.Location = new System.Drawing.Point(117, 132);
+            this.uiTextBox6.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.uiTextBox6.Maximum = 2147483647D;
+            this.uiTextBox6.Minimum = -2147483648D;
+            this.uiTextBox6.MinimumSize = new System.Drawing.Size(1, 1);
+            this.uiTextBox6.Name = "uiTextBox6";
+            this.uiTextBox6.Padding = new System.Windows.Forms.Padding(5);
+            this.uiTextBox6.Size = new System.Drawing.Size(221, 29);
+            this.uiTextBox6.Symbol = 61461;
+            this.uiTextBox6.TabIndex = 37;
+            this.uiTextBox6.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.uiTextBox6.Watermark = "水印文字";
+            // 
+            // uiTextBox5
+            // 
+            this.uiTextBox5.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.uiTextBox5.FillColor = System.Drawing.Color.White;
+            this.uiTextBox5.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.uiTextBox5.Icon = global::Sunny.UI.Demo.Properties.Resources.Home_32x32;
+            this.uiTextBox5.Location = new System.Drawing.Point(117, 93);
+            this.uiTextBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.uiTextBox5.Maximum = 2147483647D;
+            this.uiTextBox5.Minimum = -2147483648D;
+            this.uiTextBox5.MinimumSize = new System.Drawing.Size(1, 1);
+            this.uiTextBox5.Name = "uiTextBox5";
+            this.uiTextBox5.Padding = new System.Windows.Forms.Padding(5);
+            this.uiTextBox5.Size = new System.Drawing.Size(221, 29);
+            this.uiTextBox5.TabIndex = 36;
+            this.uiTextBox5.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
+            this.uiTextBox5.Watermark = "水印文字";
             // 
             // FTextBox
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 21F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(800, 565);
             this.Name = "FTextBox";
             this.Symbol = 61962;
@@ -321,5 +367,7 @@
         private UILine uiLine2;
         private UIContextMenuStrip uiContextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem aaToolStripMenuItem;
+        private UITextBox uiTextBox6;
+        private UITextBox uiTextBox5;
     }
 }

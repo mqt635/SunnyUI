@@ -20,6 +20,7 @@
  * 2020-05-05: V2.2.5 增加下拉选择框，进度提升窗体
 ******************************************************************************/
 
+using System;
 using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
@@ -148,7 +149,7 @@ namespace Sunny.UI
         public static bool ShowMessageDialog(this Form form, string message, string title, bool isShowCancel, UIStyle style)
         {
             UIMessageForm frm = new UIMessageForm();
-            frm.TopMost = form.TopMost;
+            frm.TopMost = form != null && form.TopMost;
             frm.ShowMessage(message, title, isShowCancel, style);
             frm.ShowDialog();
             bool isOk = frm.IsOK;
@@ -164,8 +165,9 @@ namespace Sunny.UI
         /// <param name="showCancelButton">显示取消按钮</param>
         /// <param name="style">主题</param>
         /// <param name="showMask">显示遮罩层</param>
+        /// <param name="topMost">置顶</param>
         /// <returns>结果</returns>
-        public static bool ShowMessageDialog(string message, string title, bool showCancelButton, UIStyle style, bool showMask = true)
+        public static bool ShowMessageDialog(string message, string title, bool showCancelButton, UIStyle style, bool showMask = true, bool topMost = false)
         {
             Point pt = SystemEx.GetCursorPos();
             Rectangle screen = Screen.GetBounds(pt);
@@ -189,7 +191,7 @@ namespace Sunny.UI
             frm.StartPosition = FormStartPosition.CenterScreen;
             frm.ShowMessage(message, title, showCancelButton, style);
             frm.ShowInTaskbar = false;
-            frm.TopMost = showMask;
+            frm.TopMost = showMask || topMost;
             frm.ShowDialog();
             bool isOk = frm.IsOK;
             frm.Dispose();
@@ -201,39 +203,39 @@ namespace Sunny.UI
 
     public static class UIMessageBox
     {
-        public static void Show(string text, bool showMask = true)
+        public static void Show(string text, bool showMask = true, bool topMost = false)
         {
-            Show(text, UILocalize.InfoTitle, UIStyle.Blue, UIMessageBoxButtons.OK, showMask);
+            Show(text, UILocalize.InfoTitle, UIStyle.Blue, UIMessageBoxButtons.OK, showMask, topMost);
         }
 
-        public static void ShowInfo(string text, bool showMask = true)
+        public static void ShowInfo(string text, bool showMask = true, bool topMost = false)
         {
-            Show(text, UILocalize.InfoTitle, UIStyle.Gray, UIMessageBoxButtons.OK, showMask);
+            Show(text, UILocalize.InfoTitle, UIStyle.Gray, UIMessageBoxButtons.OK, showMask, topMost);
         }
 
-        public static void ShowSuccess(string text, bool showMask = true)
+        public static void ShowSuccess(string text, bool showMask = true, bool topMost = false)
         {
-            Show(text, UILocalize.SuccessTitle, UIStyle.Green, UIMessageBoxButtons.OK, showMask);
+            Show(text, UILocalize.SuccessTitle, UIStyle.Green, UIMessageBoxButtons.OK, showMask, topMost);
         }
 
-        public static void ShowWarning(string text, bool showMask = true)
+        public static void ShowWarning(string text, bool showMask = true, bool topMost = false)
         {
-            Show(text, UILocalize.WarningTitle, UIStyle.Orange, UIMessageBoxButtons.OK, showMask);
+            Show(text, UILocalize.WarningTitle, UIStyle.Orange, UIMessageBoxButtons.OK, showMask, topMost);
         }
 
-        public static void ShowError(string text, bool showMask = true)
+        public static void ShowError(string text, bool showMask = true, bool topMost = false)
         {
-            Show(text, UILocalize.ErrorTitle, UIStyle.Red, UIMessageBoxButtons.OK, showMask);
+            Show(text, UILocalize.ErrorTitle, UIStyle.Red, UIMessageBoxButtons.OK, showMask, topMost);
         }
 
-        public static bool ShowAsk(string text, bool showMask = true)
+        public static bool ShowAsk(string text, bool showMask = true, bool topMost = false)
         {
-            return Show(text, UILocalize.AskTitle, UIStyle.Blue, UIMessageBoxButtons.OKCancel, showMask);
+            return Show(text, UILocalize.AskTitle, UIStyle.Blue, UIMessageBoxButtons.OKCancel, showMask, topMost);
         }
 
-        public static bool Show(string text, string caption, UIStyle style = UIStyle.Blue, UIMessageBoxButtons buttons = UIMessageBoxButtons.OK, bool showMask = true)
+        public static bool Show(string text, string caption, UIStyle style = UIStyle.Blue, UIMessageBoxButtons buttons = UIMessageBoxButtons.OK, bool showMask = true, bool topMost = false)
         {
-            return UIMessageDialog.ShowMessageDialog(text, caption, buttons == UIMessageBoxButtons.OKCancel, style, showMask);
+            return UIMessageDialog.ShowMessageDialog(text, caption, buttons == UIMessageBoxButtons.OKCancel, style, showMask, topMost);
         }
     }
 
@@ -252,7 +254,7 @@ namespace Sunny.UI
 
     public static class UIInputDialog
     {
-        private static bool InputStringDialog(ref string value, bool checkEmpty = true, string desc = "请输入字符串：", UIStyle style = UIStyle.Blue, bool topMost = false)
+        public static bool InputStringDialog(ref string value, bool checkEmpty = true, string desc = "请输入字符串：", UIStyle style = UIStyle.Blue, bool topMost = false)
         {
             UIInputForm frm = new UIInputForm();
             frm.TopMost = topMost;
@@ -273,20 +275,20 @@ namespace Sunny.UI
 
         public static bool InputStringDialog(this UIForm form, ref string value, bool checkEmpty = true, string desc = "请输入字符串：")
         {
-            return InputStringDialog(ref value, checkEmpty, desc, form.Style, form.TopMost);
+            return InputStringDialog(ref value, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputStringDialog(this UIPage form, ref string value, bool checkEmpty = true, string desc = "请输入字符串：")
         {
-            return InputStringDialog(ref value, checkEmpty, desc, form.Style, form.TopMost);
+            return InputStringDialog(ref value, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputStringDialog(this Form form, ref string value, bool checkEmpty = true, string desc = "请输入字符串：", UIStyle style = UIStyle.Blue)
         {
-            return InputStringDialog(ref value, checkEmpty, desc, style, form.TopMost);
+            return InputStringDialog(ref value, checkEmpty, desc, style, form != null && form.TopMost);
         }
 
-        private static bool InputPasswordDialog(ref string value, bool checkEmpty = true, string desc = "请输入密码：", UIStyle style = UIStyle.Blue, bool topMost = false)
+        public static bool InputPasswordDialog(ref string value, bool checkEmpty = true, string desc = "请输入密码：", UIStyle style = UIStyle.Blue, bool topMost = false)
         {
             UIInputForm frm = new UIInputForm();
             frm.TopMost = topMost;
@@ -307,20 +309,20 @@ namespace Sunny.UI
 
         public static bool InputPasswordDialog(this UIForm form, ref string value, bool checkEmpty = true, string desc = "请输入密码：")
         {
-            return InputPasswordDialog(ref value, checkEmpty, desc, form.Style, form.TopMost);
+            return InputPasswordDialog(ref value, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputPasswordDialog(this UIPage form, ref string value, bool checkEmpty = true, string desc = "请输入密码：")
         {
-            return InputPasswordDialog(ref value, checkEmpty, desc, form.Style, form.TopMost);
+            return InputPasswordDialog(ref value, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputPasswordDialog(this Form form, ref string value, bool checkEmpty = true, string desc = "请输入密码：", UIStyle style = UIStyle.Blue)
         {
-            return InputPasswordDialog(ref value, checkEmpty, desc, style, form.TopMost);
+            return InputPasswordDialog(ref value, checkEmpty, desc, style, form != null && form.TopMost);
         }
 
-        private static bool InputIntegerDialog(ref int value, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
+        public static bool InputIntegerDialog(ref int value, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
         {
             UIInputForm frm = new UIInputForm();
             frm.TopMost = topMost;
@@ -340,7 +342,7 @@ namespace Sunny.UI
             return false;
         }
 
-        private static bool InputIntegerDialog(ref int value, int minimum, int maximum, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
+        public static bool InputIntegerDialog(ref int value, int minimum, int maximum, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
         {
             UIInputForm frm = new UIInputForm();
             frm.TopMost = topMost;
@@ -367,35 +369,35 @@ namespace Sunny.UI
 
         public static bool InputIntegerDialog(this UIForm form, ref int value, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputIntegerDialog(ref value, checkEmpty, desc, form.Style, form.TopMost);
+            return InputIntegerDialog(ref value, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputIntegerDialog(this UIPage form, ref int value, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputIntegerDialog(ref value, checkEmpty, desc, form.Style, form.TopMost);
+            return InputIntegerDialog(ref value, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputIntegerDialog(this Form form, ref int value, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue)
         {
-            return InputIntegerDialog(ref value, checkEmpty, desc, style, form.TopMost);
+            return InputIntegerDialog(ref value, checkEmpty, desc, style, form != null && form.TopMost);
         }
 
         public static bool InputIntegerDialog(this UIForm form, ref int value, int minimum, int maximum, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputIntegerDialog(ref value, minimum, maximum, checkEmpty, desc, form.Style, form.TopMost);
+            return InputIntegerDialog(ref value, minimum, maximum, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputIntegerDialog(this UIPage form, ref int value, int minimum, int maximum, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputIntegerDialog(ref value, minimum, maximum, checkEmpty, desc, form.Style, form.TopMost);
+            return InputIntegerDialog(ref value, minimum, maximum, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputIntegerDialog(this Form form, ref int value, int minimum, int maximum, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue)
         {
-            return InputIntegerDialog(ref value, minimum, maximum, checkEmpty, desc, style, form.TopMost);
+            return InputIntegerDialog(ref value, minimum, maximum, checkEmpty, desc, style, form != null && form.TopMost);
         }
 
-        private static bool InputDoubleDialog(ref double value, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
+        public static bool InputDoubleDialog(ref double value, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
         {
             UIInputForm frm = new UIInputForm();
             frm.TopMost = topMost;
@@ -416,7 +418,7 @@ namespace Sunny.UI
             return false;
         }
 
-        private static bool InputDoubleDialog(ref double value, double minimum, double maximum, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
+        public static bool InputDoubleDialog(ref double value, double minimum, double maximum, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue, bool topMost = false)
         {
             UIInputForm frm = new UIInputForm();
             frm.TopMost = topMost;
@@ -443,32 +445,32 @@ namespace Sunny.UI
 
         public static bool InputDoubleDialog(this UIForm form, ref double value, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputDoubleDialog(ref value, decimals, checkEmpty, desc, form.Style, form.TopMost);
+            return InputDoubleDialog(ref value, decimals, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputDoubleDialog(this UIPage form, ref double value, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputDoubleDialog(ref value, decimals, checkEmpty, desc, form.Style, form.TopMost);
+            return InputDoubleDialog(ref value, decimals, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputDoubleDialog(this Form form, ref double value, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue)
         {
-            return InputDoubleDialog(ref value, decimals, checkEmpty, desc, style, form.TopMost);
+            return InputDoubleDialog(ref value, decimals, checkEmpty, desc, style, form != null && form.TopMost);
         }
 
         public static bool InputDoubleDialog(this UIForm form, ref double value, double minimum, double maximum, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputDoubleDialog(ref value, minimum, maximum, decimals, checkEmpty, desc, form.Style, form.TopMost);
+            return InputDoubleDialog(ref value, minimum, maximum, decimals, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputDoubleDialog(this UIPage form, ref double value, double minimum, double maximum, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：")
         {
-            return InputDoubleDialog(ref value, minimum, maximum, decimals, checkEmpty, desc, form.Style, form.TopMost);
+            return InputDoubleDialog(ref value, minimum, maximum, decimals, checkEmpty, desc, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool InputDoubleDialog(this Form form, ref double value, double minimum, double maximum, int decimals = 2, bool checkEmpty = true, string desc = "请输入数字：", UIStyle style = UIStyle.Blue)
         {
-            return InputDoubleDialog(ref value, minimum, maximum, decimals, checkEmpty, desc, style, form.TopMost);
+            return InputDoubleDialog(ref value, minimum, maximum, decimals, checkEmpty, desc, style, form != null && form.TopMost);
         }
     }
 
@@ -497,7 +499,7 @@ namespace Sunny.UI
 
         public static bool ShowSelectDialog(this Form form, ref int selectIndex, IList items, UIStyle style = UIStyle.Blue)
         {
-            return form.ShowSelectDialog(ref selectIndex, items, UILocalize.SelectTitle, "", style, form.TopMost);
+            return form.ShowSelectDialog(ref selectIndex, items, UILocalize.SelectTitle, "", style, form != null && form.TopMost);
         }
 
         public static bool ShowSelectDialog(this UIForm form, ref int selectIndex, IList items)
@@ -512,12 +514,12 @@ namespace Sunny.UI
 
         public static bool ShowSelectDialog(this UIForm form, ref int selectIndex, IList items, string title, string description)
         {
-            return form.ShowSelectDialog(ref selectIndex, items, title, description, form.Style, form.TopMost);
+            return form.ShowSelectDialog(ref selectIndex, items, title, description, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
 
         public static bool ShowSelectDialog(this UIPage form, ref int selectIndex, IList items, string title, string description)
         {
-            return form.ShowSelectDialog(ref selectIndex, items, title, description, form.Style, form.TopMost);
+            return form.ShowSelectDialog(ref selectIndex, items, title, description, form != null ? form.Style : UIStyle.Blue, form != null && form.TopMost);
         }
     }
 
@@ -593,5 +595,29 @@ namespace Sunny.UI
             frm.ShowInTaskbar = false;
             frm.TopMost = true;
         }
+
+        public static UIEditForm CreateForm(this UIEditOption option)
+        {
+            return new UIEditForm(option);
+        }
+    }
+
+    public interface IFrame
+    {
+        UITabControl MainTabControl { get; }
+
+        UIPage AddPage(UIPage page, int index);
+
+        UIPage AddPage(UIPage page, Guid guid);
+
+        UIPage AddPage(UIPage page);
+
+        void SelectPage(int pageIndex);
+
+        bool TopMost { get; set; }
+
+        bool RemovePage(int pageIndex);
+
+        bool RemovePage(Guid guid);
     }
 }

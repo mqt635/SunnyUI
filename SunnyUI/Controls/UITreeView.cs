@@ -41,6 +41,7 @@ namespace Sunny.UI
         public UITreeView()
         {
             InitializeComponent();
+            SetStyleFlags(true, false);
             ShowText = false;
             SetScrollInfo();
 
@@ -58,6 +59,9 @@ namespace Sunny.UI
             view.NodeMouseClick += View_NodeMouseClick;
             view.NodeMouseDoubleClick += View_NodeMouseDoubleClick;
         }
+
+        [Browsable(false)]
+        public TreeView TreeView => view;
 
         public override void SetStyleColor(UIBaseStyle uiColor)
         {

@@ -39,19 +39,23 @@ namespace Sunny.UI
         /// </summary>
         public UIControl()
         {
-            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            SetStyle(ControlStyles.DoubleBuffer, true);
-            SetStyle(ControlStyles.Selectable, true);
-            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-            SetStyle(ControlStyles.UserPaint, true);
-            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            base.DoubleBuffered = true;
-            UpdateStyles();
-
             Version = UIGlobal.Version;
             base.Font = UIFontColor.Font;
             Size = new Size(100, 35);
             base.MinimumSize = new Size(1, 1);
+        }
+
+        protected void SetStyleFlags(bool supportTransparent = true, bool selectable = true, bool resizeRedraw = false)
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            if (supportTransparent) SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            if (selectable) SetStyle(ControlStyles.Selectable, true);
+            if (resizeRedraw) SetStyle(ControlStyles.ResizeRedraw, true);
+            base.DoubleBuffered = true;
+            UpdateStyles();
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -194,6 +198,24 @@ namespace Sunny.UI
             }
         }
 
+        private bool showFill = true;
+
+        /// <summary>
+        /// 是否显示填充
+        /// </summary>
+        protected bool ShowFill
+        {
+            get => showFill;
+            set
+            {
+                if (showFill != value)
+                {
+                    showFill = value;
+                    Invalidate();
+                }
+            }
+        }
+
         /// <summary>
         /// 版本
         /// </summary>
@@ -305,15 +327,13 @@ namespace Sunny.UI
         /// <param name="e">e</param>
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e);
-
             if (!Visible || Width <= 0 || Height <= 0) return;
 
             Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
             GraphicsPath path = rect.CreateRoundedRectanglePath(radius, RadiusSides);
 
             //填充背景色
-            if (fillColor.IsValid())
+            if (ShowFill && fillColor.IsValid())
             {
                 OnPaintFill(e.Graphics, path);
             }
@@ -331,11 +351,8 @@ namespace Sunny.UI
             }
 
             path.Dispose();
-
-            PaintOther?.Invoke(this, e);
+            base.OnPaint(e);
         }
-
-        public event PaintEventHandler PaintOther;
 
         /// <summary>
         /// 获取边框颜色

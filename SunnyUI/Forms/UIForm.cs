@@ -23,6 +23,7 @@
  * 2020-09-17: V2.2.7 重写WindowState相关代码
  * 2020-09-17: V2.2.7 增加了窗体可拉拽调整大小ShowDragStretch属性
  * 2021-02-04: V3.0.1 标题栏增加扩展按钮
+ * 2021-05-06: V3.0.3 增加属性，标题栏可放置控件
 ******************************************************************************/
 
 using System;
@@ -64,6 +65,13 @@ namespace Sunny.UI
             FormBorderStyle = FormBorderStyle.None;
             m_aeroEnabled = false;
             showTitleIcon = false;
+        }
+
+        [DefaultValue(false)]
+        [Description("允许在标题栏放置控件"), Category("SunnyUI")]
+        public bool AllowAddControlOnTitle
+        {
+            get; set;
         }
 
         [DefaultValue(false)]
@@ -195,7 +203,7 @@ namespace Sunny.UI
                 }
             }
 
-            if (ShowTitle && e.Control.Top < TitleHeight)
+            if (ShowTitle && !AllowAddControlOnTitle && e.Control.Top < TitleHeight)
             {
                 e.Control.Top = Padding.Top;
             }
@@ -1417,7 +1425,15 @@ namespace Sunny.UI
 
         protected override void WndProc(ref Message m)
         {
-            base.WndProc(ref m);
+            switch (m.Msg)
+            {
+                case Win32.User.WM_ERASEBKGND:
+                    m.Result = IntPtr.Zero;
+                    break;
+                default:
+                    base.WndProc(ref m);
+                    break;
+            }
 
             if (m.Msg == Win32.User.WM_NCHITTEST && ShowDragStretch && WindowState == FormWindowState.Normal)
             {
@@ -1470,14 +1486,16 @@ namespace Sunny.UI
         #endregion 拉拽调整窗体大小
 
         #region 一些辅助窗口
+
         /// <summary>
         /// 显示进度提示窗
         /// </summary>
         /// <param name="desc">描述文字</param>
         /// <param name="maximum">最大进度值</param>
-        public void ShowStatusForm(int maximum = 100, string desc = "系统正在处理中，请稍候...")
+        /// <param name="decimalCount">显示进度条小数个数</param>
+        public void ShowStatusForm(int maximum = 100, string desc = "系统正在处理中，请稍候...", int decimalCount = 1)
         {
-            UIStatusFormService.ShowStatusForm(maximum, desc);
+            UIStatusFormService.ShowStatusForm(maximum, desc, decimalCount);
         }
 
         /// <summary>
@@ -1538,7 +1556,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowSuccessDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.SuccessTitle, false, UIStyle.Green, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.SuccessTitle, false, UIStyle.Green, showMask, TopMost);
         }
 
         /// <summary>
@@ -1548,7 +1566,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowInfoDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.InfoTitle, false, UIStyle.Gray, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.InfoTitle, false, UIStyle.Gray, showMask, TopMost);
         }
 
         /// <summary>
@@ -1558,7 +1576,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowWarningDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.WarningTitle, false, UIStyle.Orange, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.WarningTitle, false, UIStyle.Orange, showMask, TopMost);
         }
 
         /// <summary>
@@ -1568,7 +1586,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowErrorDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.ErrorTitle, false, UIStyle.Red, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.ErrorTitle, false, UIStyle.Red, showMask, TopMost);
         }
 
         /// <summary>
@@ -1579,7 +1597,7 @@ namespace Sunny.UI
         /// <returns>结果</returns>
         public bool ShowAskDialog(string msg, bool showMask = true)
         {
-            return UIMessageDialog.ShowMessageDialog(msg, UILocalize.AskTitle, true, UIStyle.Blue, showMask);
+            return UIMessageDialog.ShowMessageDialog(msg, UILocalize.AskTitle, true, UIStyle.Blue, showMask, TopMost);
         }
 
         /// <summary>
@@ -1591,7 +1609,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowSuccessDialog(string title, string msg, UIStyle style = UIStyle.Green, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, TopMost);
         }
 
         /// <summary>
@@ -1603,7 +1621,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowInfoDialog(string title, string msg, UIStyle style = UIStyle.Gray, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, TopMost);
         }
 
         /// <summary>
@@ -1615,7 +1633,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowWarningDialog(string title, string msg, UIStyle style = UIStyle.Orange, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, TopMost);
         }
 
         /// <summary>
@@ -1627,7 +1645,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowErrorDialog(string title, string msg, UIStyle style = UIStyle.Red, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, TopMost);
         }
 
         /// <summary>
@@ -1640,7 +1658,7 @@ namespace Sunny.UI
         /// <returns>结果</returns>
         public bool ShowAskDialog(string title, string msg, UIStyle style = UIStyle.Blue, bool showMask = true)
         {
-            return UIMessageDialog.ShowMessageDialog(msg, title, true, style, showMask);
+            return UIMessageDialog.ShowMessageDialog(msg, title, true, style, showMask, TopMost);
         }
 
         /// <summary>

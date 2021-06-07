@@ -29,24 +29,25 @@ using System.Windows.Forms;
 
 namespace Sunny.UI
 {
-    [DefaultEvent("ValueChanged")]
-    [DefaultProperty("Text")]
+    [DefaultEvent("CheckedChanged")]
+    [DefaultProperty("Checked")]
     [ToolboxItem(true)]
     public class UICheckBox : UIControl
     {
         public UICheckBox()
         {
-            Cursor = Cursors.Hand;
+            SetStyleFlags();
+            base.Cursor = Cursors.Hand;
             ShowRect = false;
             Size = new Size(150, 29);
             foreColor = UIStyles.Blue.CheckBoxForeColor;
             fillColor = UIStyles.Blue.CheckBoxColor;
             SetStyle(ControlStyles.StandardDoubleClick, UseDoubleClick);
-            PaintOther += UICheckBox_PaintOther;
         }
 
-        private void UICheckBox_PaintOther(object sender, PaintEventArgs e)
+        protected override void OnPaint(PaintEventArgs e)
         {
+            base.OnPaint(e);
             if (AutoSize)
             {
                 SizeF sf = Text.MeasureString(Font);
@@ -67,7 +68,7 @@ namespace Sunny.UI
             set
             {
                 autoSize = value;
-                UICheckBox_PaintOther(this, null);
+                Invalidate();
             }
         }
 
@@ -92,6 +93,7 @@ namespace Sunny.UI
         }
 
         [DefaultValue(false)]
+        [Description("是否只读"), Category("SunnyUI")]
         public bool ReadOnly { get; set; }
 
         /// <summary>
@@ -128,9 +130,12 @@ namespace Sunny.UI
             {
                 _checked = value;
                 ValueChanged?.Invoke(this, _checked);
+                CheckedChanged?.Invoke(this, new EventArgs());
                 Invalidate();
             }
         }
+
+        public event EventHandler CheckedChanged;
 
         protected override void OnPaintFore(Graphics g, GraphicsPath path)
         {

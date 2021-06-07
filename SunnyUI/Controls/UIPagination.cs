@@ -17,6 +17,7 @@
  * 创建日期: 2020-07-26
  *
  * 2020-07-15: V2.2.6 新增分页控件
+ * 2021-03-27: V3.0.2 修正因两次查询数量相等而引起的不刷新
 ******************************************************************************/
 
 using System;
@@ -83,6 +84,7 @@ namespace Sunny.UI
         public UIPagination()
         {
             InitializeComponent();
+            SetStyleFlags(true, false);
 
             ShowText = false;
             buttons.TryAdd(0, b0);
@@ -138,12 +140,9 @@ namespace Sunny.UI
             get => totalCount;
             set
             {
-                if (totalCount != value)
-                {
-                    totalCount = Math.Max(0, value);
-                    SetShowButtons();
-                    DataBind();
-                }
+                totalCount = Math.Max(0, value);
+                SetShowButtons();
+                DataBind();
             }
         }
 
@@ -203,13 +202,10 @@ namespace Sunny.UI
             get => activePage;
             set
             {
-                //if (activePage != value)
-                {
-                    activePage = Math.Max(1, value);
-                    edtPage.IntValue = activePage;
-                    SetShowButtons();
-                    DataBind();
-                }
+                activePage = Math.Max(1, value);
+                edtPage.IntValue = activePage;
+                SetShowButtons();
+                DataBind();
             }
         }
 
@@ -846,7 +842,7 @@ namespace Sunny.UI
         {
             if (dataSource == null)
             {
-                PageChanged?.Invoke(this, dataSource, activePage, 0);
+                PageChanged?.Invoke(this, dataSource, activePage, PageSize);
                 return;
             }
 

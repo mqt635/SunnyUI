@@ -86,7 +86,7 @@ namespace Sunny.UI
                     edit.Left = option.LabelWidth;
                     edit.Width = option.ValueWidth;
                     edit.Top = top;
-                    edit.Text = info.Value.ToString();
+                    edit.Text = info.Value?.ToString();
                     edit.Parent = this;
                     edit.Name = "Edit_" + info.DataPropertyName;
                     edit.EnterAsTab = true;
@@ -100,7 +100,7 @@ namespace Sunny.UI
                     edit.Left = option.LabelWidth;
                     edit.Width = option.ValueWidth;
                     edit.Top = top;
-                    edit.Text = info.Value.ToString();
+                    edit.Text = info.Value?.ToString();
                     edit.Parent = this;
                     edit.PasswordChar = '*';
                     edit.Name = "Edit_" + info.DataPropertyName;
@@ -161,6 +161,55 @@ namespace Sunny.UI
                     edit.Parent = this;
                     edit.Name = "Edit_" + info.DataPropertyName;
                     edit.Enabled = info.Enabled;
+                    ctrls.Add(edit);
+                }
+
+                if (info.EditType == EditType.Switch)
+                {
+                    UISwitch edit = new UISwitch();
+                    edit.SwitchShape = UISwitch.UISwitchShape.Square;
+                    edit.Left = option.LabelWidth - 1;
+                    edit.Width = 75;
+                    edit.Height = 29;
+                    edit.Top = top;
+                    edit.Active = (bool)info.Value;
+                    edit.Parent = this;
+                    edit.Name = "Edit_" + info.DataPropertyName;
+                    edit.Enabled = info.Enabled;
+                    ctrls.Add(edit);
+                }
+
+                if (info.EditType == EditType.Combobox)
+                {
+                    UIComboBox edit = new UIComboBox();
+                    edit.DropDownStyle = UIDropDownStyle.DropDownList;
+                    edit.Left = option.LabelWidth;
+                    edit.Width = info.HalfWidth ? option.ValueWidth / 2 : option.ValueWidth;
+                    edit.Top = top;
+                    edit.Parent = this;
+                    edit.Name = "Edit_" + info.DataPropertyName;
+                    edit.Enabled = info.Enabled;
+
+                    if (info.DisplayMember.IsNullOrEmpty())
+                    {
+                        object[] items = (object[])info.DataSource;
+                        if (items != null)
+                        {
+                            edit.Items.AddRange(items);
+                            int index = info.Value.ToString().ToInt();
+                            if (index < items.Length)
+                                edit.SelectedIndex = index;
+                        }
+                    }
+                    else
+                    {
+                        edit.DisplayMember = info.DisplayMember;
+                        edit.ValueMember = info.ValueMember;
+                        edit.DataSource = info.DataSource;
+                        edit.SelectedValue = info.Value;
+                    }
+
+
                     ctrls.Add(edit);
                 }
 
@@ -234,6 +283,14 @@ namespace Sunny.UI
                 return;
             }
 
+            if (CheckedData != null)
+            {
+                if (!CheckedData.Invoke(this, new EditFormEventArgs(this)))
+                {
+                    return;
+                }
+            }
+
             if (ButtonOkClick != null)
             {
                 ButtonOkClick.Invoke(sender, e);
@@ -258,6 +315,13 @@ namespace Sunny.UI
                 IsOK = false;
                 Close();
             }
+        }
+
+        public void SetEditorFocus(string dataPropertyName)
+        {
+            Control editor = this.GetControl<UITextBox>("Edit_" + dataPropertyName);
+            if (editor != null)
+                editor.Focus();
         }
 
         protected virtual bool CheckData()
@@ -308,10 +372,43 @@ namespace Sunny.UI
                         if (edit == null) continue;
                         info.Value = edit.Value;
                     }
+
+                    if (info.EditType == EditType.Combobox)
+                    {
+                        UIComboBox edit = this.GetControl<UIComboBox>("Edit_" + info.DataPropertyName);
+                        if (edit == null) continue;
+                        info.Value = edit.ValueMember.IsValid() ? edit.SelectedValue : edit.SelectedIndex;
+                    }
+
+                    if (info.EditType == EditType.Switch)
+                    {
+                        UISwitch edit = this.GetControl<UISwitch>("Edit_" + info.DataPropertyName);
+                        if (edit == null) continue;
+                        info.Value = edit.Active;
+                    }
                 }
             }
 
             return true;
+        }
+
+        public delegate bool OnCheckedData(object sender, EditFormEventArgs e);
+
+        public event OnCheckedData CheckedData;
+
+        public class EditFormEventArgs : EventArgs
+        {
+            public EditFormEventArgs()
+            {
+
+            }
+
+            public EditFormEventArgs(UIEditForm editor)
+            {
+                Form = editor;
+            }
+
+            public UIEditForm Form { get; set; }
         }
 
         protected override void OnSizeChanged(EventArgs e)

@@ -119,6 +119,7 @@
             this.PagePanel.Controls.Add(this.uiDatePicker1);
             this.PagePanel.Controls.Add(this.uiComboBox2);
             this.PagePanel.Controls.Add(this.uiComboBox1);
+            this.PagePanel.Size = new System.Drawing.Size(800, 415);
             // 
             // uiLine8
             // 
@@ -166,6 +167,8 @@
             this.uiColorPicker1.Text = "uiColorPicker1";
             this.uiColorPicker1.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft;
             this.uiColorPicker1.Value = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(160)))), ((int)(((byte)(255)))));
+            this.uiColorPicker1.ValueChanged += new Sunny.UI.UIColorPicker.OnColorChanged(this.uiColorPicker1_ValueChanged);
+            this.uiColorPicker1.Click += new System.EventHandler(this.uiColorPicker1_Click);
             // 
             // uiLine7
             // 
@@ -242,6 +245,7 @@
             this.uiDatePicker1.MinimumSize = new System.Drawing.Size(63, 0);
             this.uiDatePicker1.Name = "uiDatePicker1";
             this.uiDatePicker1.Padding = new System.Windows.Forms.Padding(0, 0, 30, 2);
+            this.uiDatePicker1.ShowToday = true;
             this.uiDatePicker1.Size = new System.Drawing.Size(150, 29);
             this.uiDatePicker1.SymbolDropDown = 61555;
             this.uiDatePicker1.SymbolNormal = 61555;
@@ -490,8 +494,7 @@
             // 
             // FCombobox
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 21F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Name = "FCombobox";
             this.Symbol = 61776;

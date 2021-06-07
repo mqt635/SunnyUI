@@ -33,11 +33,10 @@ namespace Sunny.UI
 
         public UIWaitingBar()
         {
+            SetStyleFlags(true, false);
             MinimumSize = new Size(70, 23);
             Size = new Size(300, 29);
             ShowText = false;
-
-            PaintOther += UIWaitingBar_PaintOther;
 
             fillColor = UIColor.LightBlue;
             foreColor = UIColor.Blue;
@@ -52,8 +51,9 @@ namespace Sunny.UI
             timer.Dispose();
         }
 
-        private void UIWaitingBar_PaintOther(object sender, PaintEventArgs e)
+        protected override void OnPaint(PaintEventArgs e)
         {
+            base.OnPaint(e);
             e.Graphics.FillRoundRectangle(rectColor, (int)dz + 1, 1, sliderWidth, Height - 3, Radius);
         }
 

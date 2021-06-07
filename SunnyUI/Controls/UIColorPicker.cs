@@ -17,8 +17,9 @@
  * 创建日期: 2020-05-29
  *
  * 2020-05-31: V2.2.5 增加文件
+ * 2021-03-13: V3.0.2 增加单击事件以选中颜色
  ******************************************************************************
- * 文件名称: Color picker with color wheel and eye dropper
+ * 文件名称: UIColorPicker.cs
  * 文件说明: Color picker with color wheel and eye dropper
  * 文件作者: jkristia
  * 开源协议: CPOL
@@ -28,9 +29,11 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Sunny.UI
 {
+    [DefaultProperty("ValueChanged")]
     [ToolboxItem(true)]
     public sealed class UIColorPicker : UIDropControl
     {
@@ -44,7 +47,6 @@ namespace Sunny.UI
             this.Name = "UIColorPicker";
             this.Padding = new System.Windows.Forms.Padding(0, 0, 30, 0);
             this.ButtonClick += new System.EventHandler(this.UIColorPicker_ButtonClick);
-            this.PaintOther += new System.Windows.Forms.PaintEventHandler(this.UIColorPicker_PaintOther);
             this.ResumeLayout(false);
             this.PerformLayout();
         }
@@ -56,7 +58,7 @@ namespace Sunny.UI
         public UIColorPicker()
         {
             InitializeComponent();
-            ShowText = false;
+            //ShowText = false;
             Value = UIColor.Blue;
         }
 
@@ -64,6 +66,14 @@ namespace Sunny.UI
         {
             item.SelectedColor = Value;
             ItemForm.Show(this);
+        }
+
+        [DefaultValue(false)]
+        [Description("整个控件点击下拉选择颜色"), Category("SunnyUI")]
+        public bool FullControlSelect
+        {
+            get => fullControlSelect;
+            set => fullControlSelect = value;
         }
 
         protected override void ItemForm_ValueChanged(object sender, object value)
@@ -95,12 +105,16 @@ namespace Sunny.UI
             }
         }
 
-        private void UIColorPicker_PaintOther(object sender, System.Windows.Forms.PaintEventArgs e)
+        protected override void OnPaintFore(Graphics g, System.Drawing.Drawing2D.GraphicsPath path)
         {
-            var pathColor = e.Graphics.CreateRoundedRectanglePath(new Rectangle(3, 3, Width - 32, Height - 7), 5,
-                UICornerRadiusSides.All);
-            e.Graphics.FillPath(Value, pathColor);
+            base.OnPaintFore(g, path);
+            var pathColor = g.CreateRoundedRectanglePath(new Rectangle(3, 3, Width - 32, Height - 7), 5, UICornerRadiusSides.All);
+            g.FillPath(Value, pathColor);
+        }
 
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
             if (DropDownStyle != UIDropDownStyle.DropDownList)
                 DropDownStyle = UIDropDownStyle.DropDownList;
         }

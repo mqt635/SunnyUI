@@ -18,6 +18,7 @@
  *
  * 2020-01-01: V2.2.0 增加文件说明
  * 2020-07-01: V2.2.6 解决引发事件所有结点重绘导致闪烁；解决滚轮失效问题。
+ * 2020-03-12: V3.0.2 增加设置二级菜单底色
 ******************************************************************************/
 
 using System;
@@ -338,6 +339,7 @@ namespace Sunny.UI
             selectedColor = uiColor.SelectedColor;
             foreColor = uiColor.UnSelectedForeColor;
             hoverColor = uiColor.HoverColor;
+            secondBackColor = uiColor.SecondBackColor;
 
             if (Bar != null)
             {
@@ -445,6 +447,38 @@ namespace Sunny.UI
             node.ImageIndex = imageIndex;
         }
 
+        private bool showSecondBackColor;
+
+        [DefaultValue(false)]
+        [Description("显示二级节点背景颜色"), Category("SunnyUI")]
+        public bool ShowSecondBackColor
+        {
+            get => showSecondBackColor;
+            set
+            {
+                showSecondBackColor = value;
+                Invalidate();
+            }
+        }
+
+        private Color secondBackColor = Color.FromArgb(66, 66, 66);
+
+        [DefaultValue(typeof(Color), "66, 66, 66")]
+        [Description("二级节点背景颜色"), Category("SunnyUI")]
+        public Color SecondBackColor
+        {
+            get => secondBackColor;
+            set
+            {
+                if (secondBackColor != value)
+                {
+                    secondBackColor = value;
+                    _style = UIStyle.Custom;
+                    Invalidate();
+                }
+            }
+        }
+
         protected override void OnDrawNode(DrawTreeNodeEventArgs e)
         {
             if (BorderStyle != BorderStyle.None)
@@ -495,7 +529,13 @@ namespace Sunny.UI
                 }
                 else
                 {
-                    e.Graphics.FillRectangle(fillColor, new Rectangle(new Point(0, e.Node.Bounds.Y), new Size(Width, e.Node.Bounds.Height)));
+                    Color color = fillColor;
+                    if (showSecondBackColor && e.Node.Level > 0)
+                    {
+                        color = SecondBackColor;
+                    }
+
+                    e.Graphics.FillRectangle(color, new Rectangle(new Point(0, e.Node.Bounds.Y), new Size(Width, e.Node.Bounds.Height)));
                     e.Graphics.DrawString(e.Node.Text, Font, ForeColor, drawLeft, e.Bounds.Y + (ItemHeight - sf.Height) / 2.0f);
                 }
 
@@ -547,7 +587,7 @@ namespace Sunny.UI
             }
         }
 
-        [Description("展开节点后选中第一个子节点"), DefaultValue(true), Category("SunnyUI")]
+        [Description("展开节点后选中第一个子节点"), Category("SunnyUI")]
         public bool ExpandSelectFirst { get; set; } = true;
 
         public string Version { get; }

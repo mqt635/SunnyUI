@@ -19,6 +19,7 @@
  * 2020-01-01: V2.2.0 增加文件说明
  * 2020-06-03: V2.2.5 增加多行，增加滚动条
  * 2020-09-03: V2.2.7 增加FocusedSelectAll属性，激活时全选。
+ * 2021-04-18: V3.0.3 增加ShowScrollBar属性，单独控制垂直滚动条
 ******************************************************************************/
 
 using System;
@@ -40,11 +41,12 @@ namespace Sunny.UI
         public UITextBox()
         {
             InitializeComponent();
-
+            SetStyleFlags();
             CalcEditHeight();
-            Height = MiniHeight;
+            Height = MinHeight;
             ShowText = false;
             Font = UIFontColor.Font;
+            Padding = new Padding(0);
 
             edit.Top = (Height - edit.Height) / 2;
             edit.Left = 4;
@@ -72,12 +74,16 @@ namespace Sunny.UI
             bar.ValueChanged += Bar_ValueChanged;
             edit.MouseWheel += OnMouseWheel;
             bar.MouseEnter += Bar_MouseEnter;
+            TextAlignment = ContentAlignment.MiddleLeft;
 
             SizeChange();
 
             editCursor = Cursor;
             TextAlignmentChange += UITextBox_TextAlignmentChange;
         }
+
+        [Browsable(false)]
+        public TextBox TextBox => edit;
 
         private void Edit_Leave(object sender, EventArgs e)
         {
@@ -199,11 +205,39 @@ namespace Sunny.UI
             {
                 multiline = value;
                 edit.Multiline = value;
+                // edit.ScrollBars = value ? ScrollBars.Vertical : ScrollBars.None;
+                // bar.Visible = multiline;
 
-                edit.ScrollBars = value ? ScrollBars.Vertical : ScrollBars.None;
-                bar.Visible = multiline;
+                if (value && Type != UIEditType.String)
+                {
+                    Type = UIEditType.String;
+                }
 
                 SizeChange();
+            }
+        }
+
+        private bool showScrollBar;
+
+        [DefaultValue(false)]
+        [Description("显示垂直滚动条"), Category("SunnyUI")]
+        public bool ShowScrollBar
+        {
+            get => showScrollBar;
+            set
+            {
+                value = value && Multiline;
+                showScrollBar = value;
+                if (value)
+                {
+                    edit.ScrollBars = ScrollBars.Vertical;
+                    bar.Visible = true;
+                }
+                else
+                {
+                    edit.ScrollBars = ScrollBars.None;
+                    bar.Visible = false;
+                }
             }
         }
 
@@ -297,6 +331,12 @@ namespace Sunny.UI
             SizeChange();
         }
 
+        protected override void OnPaddingChanged(EventArgs e)
+        {
+            base.OnPaddingChanged(e);
+            SizeChange();
+        }
+
         public void SetScrollInfo()
         {
             if (bar == null)
@@ -316,14 +356,16 @@ namespace Sunny.UI
             }
         }
 
-        private int MiniHeight;
+        private int MinHeight;
+        private int MaxHeight;
 
         private void CalcEditHeight()
         {
-            UIEdit edt = new UIEdit();
+            TextBox edt = new TextBox();
             edt.Font = edit.Font;
-            edt.Invalidate();
-            MiniHeight = edt.Height;
+            MinHeight = edt.PreferredHeight;
+            edt.BorderStyle = BorderStyle.None;
+            MaxHeight = edt.PreferredHeight * 2 + MinHeight - edt.PreferredHeight;
             edt.Dispose();
         }
 
@@ -331,14 +373,28 @@ namespace Sunny.UI
         {
             if (!multiline)
             {
-                if (Height != MiniHeight)
-                {
-                    Height = MiniHeight;
-                }
+                if (Height < MinHeight) Height = MinHeight;
+                if (Height > MaxHeight) Height = MaxHeight;
 
                 edit.Top = (Height - edit.Height) / 2;
-                edit.Left = 4;
-                edit.Width = Width - 8;
+                if (icon == null && Symbol == 0)
+                {
+                    edit.Left = 4 + Padding.Left;
+                    edit.Width = Width - 8 - Padding.Left - Padding.Right;
+                }
+                else
+                {
+                    if (icon != null)
+                    {
+                        edit.Left = 4 + iconSize + Padding.Left;
+                        edit.Width = Width - 8 - iconSize - Padding.Left - Padding.Right;
+                    }
+                    else if (Symbol > 0)
+                    {
+                        edit.Left = 4 + SymbolSize + Padding.Left;
+                        edit.Width = Width - 8 - SymbolSize - Padding.Left - Padding.Right;
+                    }
+                }
             }
             else
             {
@@ -419,13 +475,29 @@ namespace Sunny.UI
 
         [DefaultValue(false)]
         [Description("是否判断最大值显示"), Category("SunnyUI")]
+        public bool MaximumEnabled
+        {
+            get => HasMaximum;
+            set => HasMaximum = value;
+        }
+
+        [DefaultValue(false)]
+        [Description("是否判断最小值显示"), Category("SunnyUI")]
+        public bool MinimumEnabled
+        {
+            get => HasMinimum;
+            set => HasMinimum = value;
+        }
+
+        [DefaultValue(false), Browsable(false)]
+        [Description("是否判断最大值显示"), Category("SunnyUI")]
         public bool HasMaximum
         {
             get => edit.HasMaxValue;
             set => edit.HasMaxValue = value;
         }
 
-        [DefaultValue(false)]
+        [DefaultValue(false), Browsable(false)]
         [Description("是否判断最小值显示"), Category("SunnyUI")]
         public bool HasMinimum
         {
@@ -611,7 +683,7 @@ namespace Sunny.UI
                 for (int i = 0; i < count; i++)
                 {
                     string currentItemText = values[i].ToString();
-                    if (!currentItemText.Equals("ListItems"))
+                    if (currentItemText != null && !currentItemText.Equals("ListItems"))
                     {
                         list.Add(values[i]);
                     }
@@ -773,6 +845,107 @@ namespace Sunny.UI
         public void Undo()
         {
             edit.Undo();
+        }
+
+        private Image icon;
+        [Description("图标"), Category("SunnyUI")]
+        [DefaultValue(null)]
+        public Image Icon
+        {
+            get => icon;
+            set
+            {
+                icon = value;
+                SizeChange();
+                Invalidate();
+            }
+        }
+
+        private int iconSize = 24;
+        [Description("图标大小(方形)"), Category("SunnyUI"), DefaultValue(24)]
+        public int IconSize
+        {
+            get => iconSize;
+            set
+            {
+                iconSize = Math.Min(MinHeight, value);
+                SizeChange();
+                Invalidate();
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+
+            if (multiline) return;
+            if (icon != null)
+            {
+                e.Graphics.DrawImage(icon, new Rectangle(4, (Height - iconSize) / 2, iconSize, iconSize), new Rectangle(0, 0, icon.Width, icon.Height), GraphicsUnit.Pixel);
+            }
+            else if (Symbol != 0)
+            {
+                e.Graphics.DrawFontImage(Symbol, SymbolSize, SymbolColor, new Rectangle(4 + symbolOffset.X, (Height - SymbolSize) / 2 + 1 + symbolOffset.Y, SymbolSize, SymbolSize));
+            }
+        }
+
+        private Point symbolOffset = new Point(0, 0);
+        [DefaultValue(typeof(Point), "0, 0")]
+        [Description("字体图标偏移"), Category("SunnyUI")]
+        public Point SymbolOffset
+        {
+            get => symbolOffset;
+            set
+            {
+                symbolOffset = value;
+                Invalidate();
+            }
+        }
+
+        public Color _symbolColor = UIFontColor.Primary;
+        [DefaultValue(typeof(Color), "48, 48, 48")]
+        [Description("字体图标颜色"), Category("SunnyUI")]
+        public Color SymbolColor
+        {
+            get => _symbolColor;
+            set
+            {
+                _symbolColor = value;
+                Invalidate();
+            }
+        }
+
+        private int _symbol = 0;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Editor(typeof(UIImagePropertyEditor), typeof(UITypeEditor))]
+        [DefaultValue(0)]
+        [Description("字体图标"), Category("SunnyUI")]
+        public int Symbol
+        {
+            get => _symbol;
+            set
+            {
+                _symbol = value;
+                SizeChange();
+                Invalidate();
+            }
+        }
+
+        private int _symbolSize = 24;
+
+        [DefaultValue(24)]
+        [Description("字体图标大小"), Category("SunnyUI")]
+        public int SymbolSize
+        {
+            get => _symbolSize;
+            set
+            {
+                _symbolSize = Math.Max(value, 16);
+                _symbolSize = Math.Min(value, MinHeight);
+                SizeChange();
+                Invalidate();
+            }
         }
     }
 }

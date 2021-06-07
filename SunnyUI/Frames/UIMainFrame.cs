@@ -26,7 +26,7 @@ using System.Windows.Forms;
 
 namespace Sunny.UI
 {
-    public partial class UIMainFrame : UIForm
+    public partial class UIMainFrame : UIForm, IFrame
     {
         public UIMainFrame()
         {
@@ -68,36 +68,6 @@ namespace Sunny.UI
             base.OnShown(e);
         }
 
-        public UIPage AddPage(UIPage page, int index)
-        {
-            page.Frame = this;
-            page.PageIndex = index;
-            MainContainer.AddPage(page);
-            return page;
-        }
-
-        public UIPage AddPage(UIPage page, Guid guid)
-        {
-            page.Frame = this;
-            page.PageGuid = guid;
-            MainContainer.AddPage(page);
-            return page;
-        }
-
-        public UIPage AddPage(UIPage page)
-        {
-            page.Frame = this;
-            MainContainer.AddPage(page);
-            return page;
-        }
-
-        public virtual void SelectPage(int pageIndex)
-        {
-            MainContainer.SelectPage(pageIndex);
-        }
-
-        protected UITabControl MainTabControl => MainContainer;
-
         public bool TabVisible
         {
             get => MainContainer.TabVisible;
@@ -129,5 +99,51 @@ namespace Sunny.UI
 
         [Description("页面选择事件"), Category("SunnyUI")]
         public event OnSelecting Selecting;
+
+        #region IFrame实现
+
+        [Browsable(false)]
+        public UITabControl MainTabControl => MainContainer;
+
+        public UIPage AddPage(UIPage page, int index)
+        {
+            page.PageIndex = index;
+            return AddPage(page);
+        }
+
+        public UIPage AddPage(UIPage page, Guid guid)
+        {
+            page.PageGuid = guid;
+            return AddPage(page);
+        }
+
+        public UIPage AddPage(UIPage page)
+        {
+            page.Frame = this;
+            MainTabControl.AddPage(page);
+            return page;
+        }
+
+        public virtual void SelectPage(int pageIndex)
+        {
+            MainTabControl.SelectPage(pageIndex);
+        }
+
+        public virtual void SelectPage(Guid guid)
+        {
+            MainTabControl.SelectPage(guid);
+        }
+
+        public bool RemovePage(int pageIndex)
+        {
+            return MainTabControl.RemovePage(pageIndex);
+        }
+
+        public bool RemovePage(Guid guid)
+        {
+            return MainTabControl.RemovePage(guid);
+        }
+
+        #endregion IFrame实现
     }
 }

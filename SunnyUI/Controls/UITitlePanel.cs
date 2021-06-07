@@ -29,6 +29,7 @@ using System.Windows.Forms;
 
 namespace Sunny.UI
 {
+    [DefaultEvent("Click"), DefaultProperty("Text")]
     public partial class UITitlePanel : UIPanel
     {
         private int _titleHeight = 35;
@@ -60,6 +61,7 @@ namespace Sunny.UI
         public UITitlePanel()
         {
             InitializeComponent();
+            SetStyleFlags(true, false);
             ShowText = false;
             foreColor = Color.White;
             CalcSystemBoxPos();
@@ -161,6 +163,8 @@ namespace Sunny.UI
                 InControlBox = inControlBox;
                 if (ShowCollapse) Invalidate();
             }
+
+            base.OnMouseMove(e);
         }
 
         protected override void OnMouseLeave(EventArgs e)

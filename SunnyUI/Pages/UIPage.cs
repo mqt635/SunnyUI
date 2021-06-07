@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Sunny.UI
@@ -39,7 +40,8 @@ namespace Sunny.UI
 
         protected UIStyle _style = UIStyle.Blue;
 
-        public UIMainFrame Frame;
+        [Browsable(false)]
+        public IFrame Frame { get; set; }
 
         public UIPage()
         {
@@ -67,6 +69,7 @@ namespace Sunny.UI
         private int _symbolSize = 24;
 
         [DefaultValue(24)]
+        [Description("字体图标大小"), Category("SunnyUI")]
         public int SymbolSize
         {
             get => _symbolSize;
@@ -84,6 +87,7 @@ namespace Sunny.UI
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         [Editor(typeof(UIImagePropertyEditor), typeof(UITypeEditor))]
         [DefaultValue(0)]
+        [Description("字体图标"), Category("SunnyUI")]
         public int Symbol
         {
             get => _symbol;
@@ -95,7 +99,7 @@ namespace Sunny.UI
             }
         }
 
-        [DefaultValue(false), Description("在Frame框架中不被关闭")]
+        [DefaultValue(false), Description("在Frame框架中不被关闭"), Category("SunnyUI")]
         public bool AlwaysOpen { get; set; }
 
         protected virtual void SymbolChange()
@@ -103,7 +107,8 @@ namespace Sunny.UI
 
         }
 
-        [Browsable(false)] public Point ParentLocation { get; set; } = new Point(0, 0);
+        [Browsable(false)]
+        public Point ParentLocation { get; set; } = new Point(0, 0);
 
         [DefaultValue(-1)]
         public int PageIndex { get; set; } = -1;
@@ -118,7 +123,7 @@ namespace Sunny.UI
         ///     边框颜色
         /// </summary>
         /// <value>The color of the border style.</value>
-        [Description("边框颜色")]
+        [Description("边框颜色"), Category("SunnyUI")]
         public Color RectColor
         {
             get => _rectColor;
@@ -146,7 +151,7 @@ namespace Sunny.UI
         }
 
         [DefaultValue(ToolStripStatusLabelBorderSides.None)]
-        [Description("边框显示位置")]
+        [Description("边框显示位置"), Category("SunnyUI")]
         public ToolStripStatusLabelBorderSides RectSides
         {
             get => _rectSides;
@@ -183,8 +188,6 @@ namespace Sunny.UI
         [Description("获取或设置可以自定义主题风格"), Category("SunnyUI")]
         public bool StyleCustomMode { get; set; }
 
-        public event EventHandler Initialize;
-
         protected override void OnControlAdded(ControlEventArgs e)
         {
             base.OnControlAdded(e);
@@ -215,7 +218,34 @@ namespace Sunny.UI
 
         public virtual void Init()
         {
-            Initialize?.Invoke(this, null);
+
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Init();
+        }
+
+        public void ReLoad()
+        {
+            OnLoad(EventArgs.Empty);
+            //EventLoad();
+        }
+
+        private void EventLoad()
+        {
+            Type type = this.GetType().BaseType;
+            while (type.Name != "Form")
+            {
+                type = type.BaseType;
+            }
+
+            FieldInfo targetMethod = type.GetField("EVENT_LOAD", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            object obj = (object)targetMethod.GetValue(this);
+
+            EventHandler handler = (EventHandler)this.Events[obj];
+            handler?.Invoke(this, EventArgs.Empty);
         }
 
         public virtual void Final()
@@ -294,14 +324,16 @@ namespace Sunny.UI
         }
 
         #region 一些辅助窗口
+
         /// <summary>
         /// 显示进度提示窗
         /// </summary>
         /// <param name="desc">描述文字</param>
         /// <param name="maximum">最大进度值</param>
-        public void ShowStatusForm(int maximum = 100, string desc = "系统正在处理中，请稍候...")
+        /// <param name="decimalCount">显示进度条小数个数</param>
+        public void ShowStatusForm(int maximum = 100, string desc = "系统正在处理中，请稍候...", int decimalCount = 1)
         {
-            UIStatusFormService.ShowStatusForm(maximum, desc);
+            UIStatusFormService.ShowStatusForm(maximum, desc, decimalCount);
         }
 
         /// <summary>
@@ -362,7 +394,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowSuccessDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.SuccessTitle, false, UIStyle.Green, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.SuccessTitle, false, UIStyle.Green, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -372,7 +404,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowInfoDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.InfoTitle, false, UIStyle.Gray, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.InfoTitle, false, UIStyle.Gray, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -382,7 +414,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowWarningDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.WarningTitle, false, UIStyle.Orange, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.WarningTitle, false, UIStyle.Orange, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -392,7 +424,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowErrorDialog(string msg, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, UILocalize.ErrorTitle, false, UIStyle.Red, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, UILocalize.ErrorTitle, false, UIStyle.Red, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -403,7 +435,7 @@ namespace Sunny.UI
         /// <returns>结果</returns>
         public bool ShowAskDialog(string msg, bool showMask = true)
         {
-            return UIMessageDialog.ShowMessageDialog(msg, UILocalize.AskTitle, true, UIStyle.Blue, showMask);
+            return UIMessageDialog.ShowMessageDialog(msg, UILocalize.AskTitle, true, UIStyle.Blue, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -415,7 +447,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowSuccessDialog(string title, string msg, UIStyle style = UIStyle.Green, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -427,7 +459,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowInfoDialog(string title, string msg, UIStyle style = UIStyle.Gray, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -439,7 +471,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowWarningDialog(string title, string msg, UIStyle style = UIStyle.Orange, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -451,7 +483,7 @@ namespace Sunny.UI
         /// <param name="showMask">显示遮罩层</param>
         public void ShowErrorDialog(string title, string msg, UIStyle style = UIStyle.Red, bool showMask = true)
         {
-            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask);
+            UIMessageDialog.ShowMessageDialog(msg, title, false, style, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>
@@ -464,7 +496,7 @@ namespace Sunny.UI
         /// <returns>结果</returns>
         public bool ShowAskDialog(string title, string msg, UIStyle style = UIStyle.Blue, bool showMask = true)
         {
-            return UIMessageDialog.ShowMessageDialog(msg, title, true, style, showMask);
+            return UIMessageDialog.ShowMessageDialog(msg, title, true, style, showMask, Frame?.TopMost ?? false);
         }
 
         /// <summary>

@@ -48,6 +48,16 @@ namespace Sunny.UI
             }
         }
 
+        private bool showTitle = true;
+
+        [Description("显示标题"), Category("SunnyUI")]
+        [DefaultValue(true)]
+        public bool ShowTitle
+        {
+            get => showTitle;
+            set => showTitle = value;
+        }
+
         protected override void SymbolChange()
         {
             base.SymbolChange();
@@ -93,6 +103,7 @@ namespace Sunny.UI
         {
             public UITitle()
             {
+                SetStyleFlags(true, false);
                 fillColor = Color.FromArgb(76, 76, 76);
                 foreColor = Color.White;
             }
@@ -157,6 +168,14 @@ namespace Sunny.UI
                 {
                     g.DrawFontImage(Symbol, SymbolSize, ForeColor, new Rectangle(6, 0, SymbolSize, Height));
                 }
+            }
+        }
+
+        private void UITitlePage_Shown(object sender, System.EventArgs e)
+        {
+            if (!IsDesignMode)
+            {
+                PageTitle.Visible = showTitle;
             }
         }
     }

@@ -17,6 +17,7 @@
  * 创建日期: 2021-02-10
  *
  * 2021-02-10: V3.0.1 增加文件说明
+ * 2021-03-27: V3.0.2 增加字体图标背景时鼠标移上背景色
 ******************************************************************************/
 
 
@@ -37,6 +38,7 @@ namespace Sunny.UI
     {
         public UIHeaderButton()
         {
+            SetStyleFlags();
             Size = new Size(100, 88);
             ShowText = false;
             ShowRect = false;
@@ -283,6 +285,24 @@ namespace Sunny.UI
             }
         }
 
+        [DefaultValue(false)]
+        [Description("是否显示字体图标鼠标移上背景颜色"), Category("SunnyUI")]
+        public bool ShowCircleHoverColor { get; set; }
+
+        private Color circleHoverColor = Color.Bisque;
+
+        [DefaultValue(typeof(Color), "Bisque")]
+        [Description("字体图标鼠标移上背景颜色"), Category("SunnyUI")]
+        public Color CircleHoverColor
+        {
+            get => circleHoverColor;
+            set
+            {
+                circleHoverColor = value;
+                Invalidate();
+            }
+        }
+
         protected override void OnPaddingChanged(EventArgs e)
         {
             base.OnPaddingChanged(e);
@@ -332,6 +352,20 @@ namespace Sunny.UI
                     SelectedChanged?.Invoke(this, new EventArgs());
                     Invalidate();
                 }
+            }
+        }
+
+        public TextImageRelation textImageRelation = TextImageRelation.ImageAboveText;
+
+        [DefaultValue(TextImageRelation.ImageAboveText)]
+        [Description("指定图像与文本的相对位置"), Category("SunnyUI")]
+        public TextImageRelation TextImageRelation
+        {
+            get => textImageRelation;
+            set
+            {
+                textImageRelation = value;
+                Invalidate();
             }
         }
 
@@ -396,33 +430,134 @@ namespace Sunny.UI
         {
             //重绘父类
             base.OnPaint(e);
-
-
             SizeF ImageSize = new SizeF(0, 0);
             if (Symbol > 0)
                 ImageSize = e.Graphics.GetFontImageSize(Symbol, SymbolSize);
             if (Image != null)
                 ImageSize = Image.Size;
 
-            //字体图标
-            if (Symbol > 0 && Image == null)
-            {
-                e.Graphics.FillEllipse(CircleColor, (Width - CircleSize) / 2.0f, Padding.Top, CircleSize, CircleSize);
-                e.Graphics.DrawFontImage(Symbol, SymbolSize, SymbolColor,
-                    new RectangleF(
-                        symbolOffset.X + (Width - CircleSize) / 2.0f,
-                        symbolOffset.Y + Padding.Top,
-                        CircleSize,
-                        CircleSize));
-            }
-            else if (Image != null)
-            {
-                e.Graphics.DrawImage(Image, (Width - ImageSize.Width) / 2.0f, ImageTop, ImageSize.Width, ImageSize.Height);
-            }
-
             Color color = GetForeColor();
             SizeF sf = e.Graphics.MeasureString(Text, Font);
-            e.Graphics.DrawString(Text, Font, color, (Width - sf.Width) / 2, Height - Padding.Bottom - sf.Height);
+
+            switch (textImageRelation)
+            {
+                case TextImageRelation.TextAboveImage:
+                    {
+                        #region  文本在上
+                        e.Graphics.DrawString(Text, Font, color, (Width - sf.Width) / 2, Padding.Top);
+
+                        //字体图标
+                        if (Symbol > 0 && Image == null)
+                        {
+                            Color bcColor = CircleColor;
+                            if (ShowCircleHoverColor && IsHover)
+                            {
+                                bcColor = CircleHoverColor;
+                            }
+
+                            e.Graphics.FillEllipse(bcColor, (Width - CircleSize) / 2.0f, Height - Padding.Bottom - CircleSize, CircleSize, CircleSize);
+                            e.Graphics.DrawFontImage(Symbol, SymbolSize, SymbolColor,
+                                new RectangleF(
+                                    symbolOffset.X + (Width - CircleSize) / 2.0f,
+                                    symbolOffset.Y + Height - Padding.Bottom - CircleSize,
+                                    CircleSize,
+                                    CircleSize));
+                        }
+                        else if (Image != null)
+                        {
+                            e.Graphics.DrawImage(Image, (Width - ImageSize.Width) / 2.0f, Height - Padding.Bottom - ImageSize.Height + imageTop, ImageSize.Width, ImageSize.Height);
+                        }
+                        #endregion
+                    }
+                    break;
+                case TextImageRelation.ImageBeforeText:
+                    {
+                        #region  图片在前   
+                        //字体图标
+                        if (Symbol > 0 && Image == null)
+                        {
+                            Color bcColor = CircleColor;
+                            if (ShowCircleHoverColor && IsHover)
+                            {
+                                bcColor = CircleHoverColor;
+                            }
+
+                            e.Graphics.FillEllipse(bcColor, Padding.Left, (Height - CircleSize) / 2.0f, CircleSize, CircleSize);
+                            e.Graphics.DrawFontImage(Symbol, SymbolSize, SymbolColor,
+                                new RectangleF(
+                                    symbolOffset.X + Padding.Left,
+                                    symbolOffset.Y + (Height - CircleSize) / 2.0f,
+                                    CircleSize,
+                                    CircleSize));
+                        }
+                        else if (Image != null)
+                        {
+                            e.Graphics.DrawImage(Image, ImageTop, (Height - ImageSize.Height) / 2.0f, ImageSize.Width, ImageSize.Height);
+                        }
+
+                        e.Graphics.DrawString(Text, Font, color, Width - Padding.Right - sf.Width, (Height - sf.Height) / 2);
+                        #endregion
+                    }
+                    break;
+                case TextImageRelation.TextBeforeImage:
+                    {
+                        #region  文本在前
+                        e.Graphics.DrawString(Text, Font, color, Padding.Left, (Height - sf.Height) / 2);
+
+                        //字体图标
+                        if (Symbol > 0 && Image == null)
+                        {
+                            Color bcColor = CircleColor;
+                            if (ShowCircleHoverColor && IsHover)
+                            {
+                                bcColor = CircleHoverColor;
+                            }
+
+                            e.Graphics.FillEllipse(bcColor, Width - Padding.Right - CircleSize, (Height - CircleSize) / 2.0f, CircleSize, CircleSize);
+                            e.Graphics.DrawFontImage(Symbol, SymbolSize, SymbolColor,
+                                new RectangleF(
+                                    symbolOffset.X + Width - Padding.Right - CircleSize,
+                                    symbolOffset.Y + (Height - CircleSize) / 2.0f,
+                                    CircleSize,
+                                    CircleSize));
+                        }
+                        else if (Image != null)
+                        {
+                            e.Graphics.DrawImage(Image, Width - Padding.Right - ImageSize.Width + imageTop, (Height - ImageSize.Height) / 2.0f, ImageSize.Width, ImageSize.Height);
+                        }
+                        #endregion
+                    }
+                    break;
+                default:
+                    {
+                        #region  图片在上
+                        //字体图标
+                        if (Symbol > 0 && Image == null)
+                        {
+                            Color bcColor = CircleColor;
+                            if (ShowCircleHoverColor && IsHover)
+                            {
+                                bcColor = CircleHoverColor;
+                            }
+
+                            e.Graphics.FillEllipse(bcColor, (Width - CircleSize) / 2.0f, Padding.Top, CircleSize, CircleSize);
+                            e.Graphics.DrawFontImage(Symbol, SymbolSize, SymbolColor,
+                                new RectangleF(
+                                    symbolOffset.X + (Width - CircleSize) / 2.0f,
+                                    symbolOffset.Y + Padding.Top,
+                                    CircleSize,
+                                    CircleSize));
+                        }
+                        else if (Image != null)
+                        {
+                            e.Graphics.DrawImage(Image, (Width - ImageSize.Width) / 2.0f, ImageTop, ImageSize.Width, ImageSize.Height);
+                        }
+
+                        e.Graphics.DrawString(Text, Font, color, (Width - sf.Width) / 2, Height - Padding.Bottom - sf.Height);
+                        #endregion
+                    }
+                    break;
+            }
         }
 
         [DefaultValue(null)]

@@ -32,6 +32,11 @@ namespace Sunny.UI
     [ToolboxItem(true)]
     public sealed class UISwitch : UIControl
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">对象</param>
+        /// <param name="value">开关值</param>
         public delegate void OnValueChanged(object sender, bool value);
 
         public enum UISwitchShape
@@ -42,6 +47,7 @@ namespace Sunny.UI
 
         public UISwitch()
         {
+            SetStyleFlags();
             Height = 29;
             Width = 75;
             ShowText = false;
@@ -51,7 +57,7 @@ namespace Sunny.UI
             fillColor = Color.White;
         }
 
-        public UISwitchShape switchShape = UISwitchShape.Round;
+        private UISwitchShape switchShape = UISwitchShape.Round;
 
         [Description("开关形状"), Category("SunnyUI")]
         [DefaultValue(UISwitchShape.Round)]
@@ -66,6 +72,8 @@ namespace Sunny.UI
         }
 
         public event OnValueChanged ValueChanged;
+
+        public event EventHandler ActiveChanged;
 
         /// <summary>
         /// 字体颜色
@@ -87,9 +95,13 @@ namespace Sunny.UI
             get => activeValue;
             set
             {
-                activeValue = value;
-                ValueChanged?.Invoke(this, value);
-                Invalidate();
+                if (activeValue != value)
+                {
+                    activeValue = value;
+                    ValueChanged?.Invoke(this, value);
+                    ActiveChanged?.Invoke(this, new EventArgs());
+                    Invalidate();
+                }
             }
         }
 

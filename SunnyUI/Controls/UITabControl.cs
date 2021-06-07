@@ -39,7 +39,12 @@ namespace Sunny.UI
 
         public UITabControl()
         {
-            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            DoubleBuffered = true;
+            UpdateStyles();
 
             ItemSize = new Size(150, 40);
             DrawMode = TabDrawMode.OwnerDrawFixed;
@@ -79,16 +84,6 @@ namespace Sunny.UI
             DrawedIndex = SelectedIndex;
         }
 
-        protected override void OnSelected(TabControlEventArgs e)
-        {
-            base.OnSelected(e);
-
-            if (ShowActiveCloseButton && !ShowCloseButton)
-            {
-                timer.Start();
-            }
-        }
-
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (ForbidCtrlTab)
@@ -114,6 +109,10 @@ namespace Sunny.UI
         public void SelectPage(Guid pageGuid) => Helper.SelectPage(pageGuid);
 
         public void AddPage(UIPage page) => Helper.AddPage(page);
+
+        public bool RemovePage(int pageIndex) => Helper.RemovePage(pageIndex);
+
+        public bool RemovePage(Guid guid) => Helper.RemovePage(guid);
 
         public void AddPages(params UIPage[] pages)
         {
@@ -589,6 +588,10 @@ namespace Sunny.UI
         {
             base.OnSelectedIndexChanged(e);
             Init(SelectedIndex);
+            if (ShowActiveCloseButton && !ShowCloseButton)
+            {
+                timer.Start();
+            }
         }
 
         public void Init(int index = 0)
@@ -604,7 +607,7 @@ namespace Sunny.UI
             List<UIPage> pages = TabPages[SelectedIndex].GetControls<UIPage>();
             foreach (var page in pages)
             {
-                page.Init();
+                page.ReLoad();
             }
 
             List<UITabControlMenu> leftTabControls = TabPages[SelectedIndex].GetControls<UITabControlMenu>();
@@ -750,6 +753,10 @@ namespace Sunny.UI
             if (e.Control is TabPage)
             {
                 e.Control.Padding = new Padding(0);
+                if (ShowActiveCloseButton && !ShowCloseButton)
+                {
+                    timer.Start();
+                }
             }
         }
 

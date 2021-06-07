@@ -22,6 +22,8 @@
  * 2020-07-18: V2.2.6 重绘水平滚动条
  * 2020-08-22: V2.2.7 更新了水平和垂直滚动条的显示，优化滚动效果。
  * 2020-08-28: V2.2.7 调整水平滚动条
+ * 2021-03-25: V3.0.2 修改垂直滚动条和原版一致，并增加翻页方式滚动。
+ * 2021-04-01: V3.0.2 编辑输入时，用Enter键代替Tab键跳到下一个单元格
 ******************************************************************************/
 
 using System;
@@ -68,13 +70,19 @@ namespace Sunny.UI
             ColumnHeadersDefaultCellStyle.ForeColor = UIColor.White;
             ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.True;
 
+            //行头部颜色
+            RowHeadersDefaultCellStyle.BackColor = UIColor.LightBlue;
+            RowHeadersDefaultCellStyle.ForeColor = UIFontColor.Primary;
+            RowHeadersDefaultCellStyle.SelectionBackColor = UIColor.Blue;
+            RowHeadersDefaultCellStyle.SelectionForeColor = Color.White;
+
             //标题行行高，与OnColumnAdded事件配合
             ColumnHeadersHeight = 32;
 
             //数据行行高
-            RowTemplate.Height = 29;
-            RowTemplate.MinimumHeight = 29;
-            AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            // RowTemplate.Height = 29;
+            // RowTemplate.MinimumHeight = 29;
+            // AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
 
             //设置奇偶数行颜色
             StripeEvenColor = UIColor.White;
@@ -85,6 +93,43 @@ namespace Sunny.UI
             VerticalScrollBar.VisibleChanged += VerticalScrollBar_VisibleChanged;
             HorizontalScrollBar.VisibleChanged += HorizontalScrollBar_VisibleChanged;
         }
+
+        [Description("行高"), Category("SunnyUI")]
+        [DefaultValue(23)]
+        public int RowHeight
+        {
+            get => RowTemplate.Height;
+            set
+            {
+                int rowHeight = Math.Max(23, value);
+                RowTemplate.Height = rowHeight;
+                RowTemplate.MinimumHeight = rowHeight;
+                AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            }
+        }
+
+        /*
+        private bool showRowIndex;
+
+        [Description("显示行号"), Category("SunnyUI")]
+        [DefaultValue(false)]
+        public bool ShowRowIndex
+        {
+            get => showRowIndex;
+            set
+            {
+                showRowIndex = value;
+                if (value) RowHeadersVisible = true;
+                Invalidate();
+            }
+        }
+
+        protected override void OnRowStateChanged(int rowIndex, DataGridViewRowStateChangedEventArgs e)
+        {
+            base.OnRowStateChanged(rowIndex, e);
+            if (ShowRowIndex) e.Row.HeaderCell.Value = (e.Row.Index + 1).ToString();
+        }
+        */
 
         private void HorizontalScrollBar_VisibleChanged(object sender, EventArgs e)
         {
@@ -133,6 +178,7 @@ namespace Sunny.UI
         private void VerticalScrollBar_ValueChanged(object sender, EventArgs e)
         {
             VBar.Value = FirstDisplayedScrollingRowIndex;
+            VerticalScrollBarChanged?.Invoke(this, e);
         }
 
         private void VBarValueChanged(object sender, EventArgs e)
@@ -149,7 +195,12 @@ namespace Sunny.UI
         {
             HorizontalScrollBar.Value = HBar.Value;
             HorizontalScrollingOffset = HBar.Value;
+            HorizontalScrollBarChanged?.Invoke(this, e);
         }
+
+        public event EventHandler HorizontalScrollBarChanged;
+
+        public event EventHandler VerticalScrollBarChanged;
 
         public void SetScrollInfo()
         {
@@ -200,7 +251,7 @@ namespace Sunny.UI
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
-            if (VBar.Visible)
+            /*if (VBar.Visible)
             {
                 if (e.Delta > 10)
                 {
@@ -210,8 +261,39 @@ namespace Sunny.UI
                 {
                     VBar.SetValue(VBar.Value + VBar.Maximum / 20);
                 }
+            }*/
+
+            if (VBar.Visible && ScrollMode == UIDataGridViewScrollMode.Page)
+            {
+                if (e.Delta > 10)
+                {
+                    var lineCount = Rows.GetLastRow(DataGridViewElementStates.Displayed) - FirstDisplayedScrollingRowIndex;
+                    VBar.SetValue(VBar.Value - lineCount + 3);
+                }
+                else if (e.Delta < -10)
+                {
+                    var lineCount = FirstDisplayedScrollingRowIndex - Rows.GetLastRow(DataGridViewElementStates.Displayed);
+                    VBar.SetValue(VBar.Value - lineCount - 3);
+                }
             }
         }
+
+        [Description("垂直滚动条滚动方式"), Category("SunnyUI")]
+        [DefaultValue(UIDataGridViewScrollMode.Normal)]
+        public UIDataGridViewScrollMode ScrollMode { get; set; } = UIDataGridViewScrollMode.Normal;
+
+        public enum UIDataGridViewScrollMode
+        {
+            /// <summary>
+            /// 正常
+            /// </summary>
+            Normal,
+            /// <summary>
+            /// 翻页
+            /// </summary>
+            Page
+        }
+
 
         protected override void OnRowsAdded(DataGridViewRowsAddedEventArgs e)
         {
@@ -345,8 +427,9 @@ namespace Sunny.UI
 
             //行头部颜色
             RowHeadersDefaultCellStyle.BackColor = uiColor.PlainColor;
-            RowHeadersDefaultCellStyle.ForeColor = uiColor.TitleForeColor;
-            RowHeadersDefaultCellStyle.SelectionBackColor = uiColor.TitleColor;
+            RowHeadersDefaultCellStyle.ForeColor = UIFontColor.Primary;
+            RowHeadersDefaultCellStyle.SelectionBackColor = uiColor.RectColor;
+            RowHeadersDefaultCellStyle.SelectionForeColor = Color.White;
 
             //数据行选中颜色
             DefaultCellStyle.SelectionBackColor = uiColor.GridSelectedColor;
@@ -557,6 +640,38 @@ namespace Sunny.UI
         {
             return Rows.Add(values);
         }
+
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (EnterAsTab)
+            {
+                Keys key = (keyData & Keys.KeyCode);
+                if (key == Keys.Enter)
+                {
+                    //交由自定义控件处理
+                    return false;
+                }
+            }
+
+            return base.ProcessDialogKey(keyData);
+        }
+
+        protected override bool ProcessDataGridViewKey(KeyEventArgs e)
+        {
+            if (EnterAsTab)
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    return this.ProcessTabKey(e.KeyData);
+                }
+            }
+
+            return base.ProcessDataGridViewKey(e);
+        }
+
+        [DefaultValue(false)]
+        [Description("编辑输入时，用Enter键代替Tab键跳到下一个单元格"), Category("SunnyUI")]
+        public bool EnterAsTab { get; set; }
     }
 
     public static class UIDataGridViewHelper
